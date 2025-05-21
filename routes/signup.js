@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const signupHelper = require('../helpers/signup-helper');
+// var productHelper = require("../helpers/product-helpers");
+// const userHelper = require('../helpers/user-helpers');
 
 
 
@@ -22,7 +24,7 @@ router.get('/signup', (req, res) => {
     }
   
     try {
-      const emailExists = await userHelper.checkEmailExists(email);
+      const emailExists = await signupHelper.checkEmailExists(email);
       if (emailExists) {
         return res.render('user/signup', { error: 'Email already registered' });
       }

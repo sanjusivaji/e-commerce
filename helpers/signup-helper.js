@@ -35,7 +35,7 @@ module.exports = {
     try {
       const db = getDb();
       const user = await db.collection(collections.USER_COLLECTION).findOne({ email });
-      return user;
+      return !!user;
     } catch (err) {
       throw new Error('Database error during email check');
     }
