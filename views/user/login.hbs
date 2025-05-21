@@ -1,0 +1,100 @@
+{{!-- This is a 'bootstrap' "<html>" code for 'login' 'form', and we put 'bootstraps' 'link' in "layout.hbs"  --}}
+
+<body>
+
+    <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="card p-4 shadow" style="width: 350px;">   
+        <h3 class="text-center">Login</h3>
+
+        <form action="/login" method="POST">
+            {{#if loginError}}
+            <p class="error brown-color">Invalid username or password</p>
+            {{/if}}
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+            </div>
+
+            <div class="form-group position-relative">
+                <label>Password</label>
+                <input type="password" name="Password" id="password" class="form-control" placeholder="Enter password" required>
+                <span id="toggleIcon" class="position-absolute light-color" style="top: 50px; right: 10px; cursor: pointer;">
+                    <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+
+        <p class="mt-3 text-center">
+            Don't have an account? <a href="/signup">Create account</a>
+        </p>
+    </div>
+</div>
+
+<script>
+     document.addEventListener('DOMContentLoaded',() => {
+        const toggleIcon = document.getElementById("toggleIcon");
+        toggleIcon.addEventListener("click", togglePassword);
+    });
+    function togglePassword() {
+        const pwd = document.getElementById("password");
+        const icon = document.getElementById("eyeIcon");
+        if (pwd.type === "password") {
+            pwd.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            pwd.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    };
+</script>
+
+{{!-- <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="card p-4 shadow" style="width: 350px;">   
+                                                            
+        <h3 class="text-center">Login</h3>
+
+        <form action="/login" method="POST">
+        {{#if loginError}}
+        <p class="error brown-color"> Invalid username or password</p>
+        {{/if}}
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="Password" class="form-control" placeholder="Enter password" required>
+                 <span onclick="togglePassword()" class="position-absolute light-color" style="top: 50px; right: 10px; cursor: pointer;">
+                    <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                </span>
+             </div>                   
+
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+
+        <p class="mt-3 text-center">   {{! "mt-3" for 'margin top 3', "text-center" for 'centering text', "<a href=" is for provide 'link' when clicking "Create account", the link "/signup" directly go to "user.js"(ie when call "localhost:3000" in browser, it 'first' go to 'www' file and then go to 'app.js' because "app.use('/', usersRouter)", and because of this 'routing' it goes to "users.js" and thier it hear as "router.get('/', async function...)", ie if we call "localhost:3000" in browser, finally it appears in 'users.js', so if we call "/login" or 'click' "login" button in "Account", it 'routes' to 'users.js' by using "router.get('/login'){....}"  in 'users.js')   --}}
+            Don't have an account? <a href="/signup">Create account</a>
+        </p>
+    </div>
+</div> --}}
+
+
+<script>
+/*function togglePassword() {
+    const pwd = document.getElementById("password");
+    const icon = document.getElementById("eyeIcon");
+    if (pwd.type === "password") {
+        pwd.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        pwd.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}
+</script>
