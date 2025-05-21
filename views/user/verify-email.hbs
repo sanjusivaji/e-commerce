@@ -1,0 +1,13 @@
+<div class="container mt-5">
+  <div class="card p-4 mx-auto" style="max-width: 400px;">
+    <h4 class="text-center">Verify Your Email</h4>
+    {{#if error}}<p class="text-danger text-center">{{error}}</p>{{/if}}
+    <form action="/verify-otp" method="POST">
+      <div class="form-group">
+        <label>Enter the OTP sent to your email</label>
+        <input type="text" name="otp" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-success btn-block">Verify</button>
+    </form>
+  </div>
+</div>

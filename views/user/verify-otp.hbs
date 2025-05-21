@@ -1,0 +1,15 @@
+<h3>Verify Email and Phone</h3>
+{{#if error}}<p style="color:red">{{error}}</p>{{/if}}
+
+<form method="POST" action="/verify-otp-submit">
+    <input type="hidden" name="email" value="{{email}}">
+    <input type="hidden" name="phone" value="{{phone}}">
+
+    <label>Email OTP</label>
+    <input type="text" name="emailOtp" class="form-control" required>
+
+    <label>Phone OTP</label>
+    <input type="text" name="phoneOtp" class="form-control" required>
+
+    <button type="submit" class="btn btn-success btn-block mt-2">Verify & Continue</button>
+</form>
