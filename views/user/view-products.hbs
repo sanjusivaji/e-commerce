@@ -1,0 +1,439 @@
+
+<div class="container mt-4">
+      
+
+       {{!-- For search-bar --}}
+      <div class="search-container">
+          <div class="input-wrapper">           
+            <input type="text" id="search-bar" placeholder="Search" oninput="debounceSearch()" onkeypress="handleKeyPress(event)" >           
+            <i class="fas fa-search icon"></i>
+          </div>      
+          <ul id="suggestion-list"></ul>
+      </div>
+
+  
+    <div class="row g-3">
+    
+          {{#if products.length}}
+
+                {{#each products}}
+                  <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card shadow-lg overflow-hidden mb-3" style=" border-radius: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+                      <!-- Product Media Carousel -->
+                      <div id="carousel-{{@index}}" class="carousel slide" data-ride="carousel" data-interval="false">
+                          <div class="carousel-inner">
+                              {{#each this.images}}
+                                <div class="carousel-item {{#if @first}}active{{/if}}">
+                                    <div class="position-relative">
+                                            <img src="{{this}}" class="d-block w-100" style="max-height: 250px; object-fit: cover;">
+                                            <div class="position-absolute" style="top: 0; left: 0; background: rgba(0,0,0,0.1); color: white; padding: 4px 8px;">
+                                              <h2 class="mb-0">{{../this.name}}</h2>
+                                            </div>
+                                            <div class="position-absolute" style="top: 0; right: 0; background: red; color: white; padding: 4px 8px; font-size: 14px;">
+                                              -{{../this.discount}}%
+                                            </div>
+                                    </div>
+                                </div>
+                              {{/each}}
+                              {{#if this.video}}
+                                <div class="carousel-item {{#unless this.images.length}}active{{/unless}}">
+                                  <div class="position-relative">
+                                        <video id="video-{{@index}}" class="d-block w-100" style="height: 250px; object-fit: cover;">
+                                          <source src="{{this.video}}" type="video/mp4">
+                                          Your browser does not support the video tag.
+                                        </video>
+                                        <button class="video-toggle-btn position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);" onclick="togglePlay('{{@index}}')">
+                                          <i id="video-icon-{{@index}}" class="fas fa-play"></i>
+                                        </button>
+                                  </div>
+                                </div>
+                              {{/if}}
+                          </div>
+                          <a class="carousel-control-prev" href="#carousel-{{@index}}" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                          </a>
+                          <a class="carousel-control-next" href="#carousel-{{@index}}" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                          </a>
+                          <ol class="carousel-indicators">
+                            {{#each this.images}}
+                              <li data-target="#carousel-{{@../index}}" data-slide-to="{{@index}}" class="{{#if @first}}active{{/if}}"></li>
+                            {{/each}}
+                            {{#if ../this.video}}
+                              <li data-target="#carousel-{{@index}}" data-slide-to="{{this.images.length}}"></li>
+                            {{/if}}
+                          </ol>
+                      </div>
+
+                      <!-- Product Content -->
+                      <div class="card-body d-flex flex-column justify-content-between">
+                        <h6 class="card-text">{{this.description}}</h6>
+
+                          <!-- Star Rating -->
+                          <div class="d-flex justify-content-end align-items-center" style="cursor: pointer;">
+                              {{#if ../user}}                                                  {{!-- If user loggedIn --}}
+                                  <div class="review-toggle" data-index="{{@index}}">
+                                    <span class="me-1 fw-bold text-dark">{{this.avgRating}}</span>
+                                    <span class="me-1">{{{starIcons this.avgRating}}}</span>
+                                    <span style="color: rgb(143, 152, 152);">({{this.reviewCount}})</span>
+                                  </div>
+                              
+                              {{else}}
+                                <div>              
+                                  <a href="/login" ><span class="me-1 fw-bold text-dark">{{this.avgRating}}</span></a>
+                                  <a href="/login" ><span class="me-1">{{{starIcons this.avgRating}}}</span></a>
+                                  <a href="/login" ><span style="color: rgb(143, 152, 152);">({{this.reviewCount}})</span></a>
+                                </div>
+                              {{/if}}
+                          </div>
+
+                          <!-- Price and Discount -->
+                          <div class="mt-2">
+                            <h4 class="mb-0"><strong>₹{{discountedPrice this.price this.discount}}</strong></h4>
+                            <h6 class="text-muted">MRP: <span style="text-decoration: line-through;">₹{{this.price}}</span></h6>
+                          </div>
+                          <h6><strong><span class="text-danger">{{this.discount}}% Off</span></strong></h6>
+
+                          <!-- inStock or outStock-->
+                          <p class="{{#if this.inStock}}text-success{{else}}text-danger{{/if}}">
+                            {{#if this.inStock}}In stock{{else}}Out of stock{{/if}}
+                          </p>
+
+                          <!-- Add to Cart / Buy Now / Quantity -->
+                          {{#if (and ../user this.inStock)}}
+                            <form method="POST" class="product-form" data-product-id="{{this._id}}">  {{!-- put '2' buttons and one drop dropdown-menu in same form  --}}
+                                <div class="mb-2">
+                                 <select class="form-select quantity-select" name="quantity" style="color: black; font-size: 16px;">    {{!-- For dropdown-menu --}}
+                                    {{#range 1 10}}                                        {{!--  '#range' iterate option and helps to display 'block content' '{{this}}' --}}
+                                      <option value="{{this}}">Quantity: {{this}}</option>    {{!-- Used for selecting one option from 'drop down menu' --}}
+                                    {{/range}}
+                                  </select>
+                                </div>
+                                  <div class="success-box">Added successfully!</div>
+                                  <button type="submit" name="action" value="add-to-cart" class="btn w-100 text-black mb-2" style="background-color: #FFD814; border-radius: 999px;">
+                                    Add to Cart
+                                  </button>
+                                  <button type="submit" formaction="/buy-now/{{this._id}}" class="btn w-100 text-black" style="background-color: #FFA41C; border-radius: 999px;">
+                                    Buy Now
+                                  </button>
+                            </form>
+                          {{else}}
+                            <div class="mb-2">
+                                <select class="form-select" disabled style="border-radius: 10px;">
+                                  <option>Quantity: 1</option>
+                                </select>
+                            </div>
+                            <a href="/login" class="btn w-100 text-black mb-2" style="background-color: #FFD814; border-radius: 999px;">Add to Cart</a>
+                            <a href="/login" class="btn w-100 text-black" style="background-color: #FFA41C; border-radius: 999px;">Buy Now</a>
+                          {{/if}}
+
+
+                            <!-- Review Display -->
+                            <div id="review-section-{{@index}}" class="mt-4 d-none" >
+                                <h5 class="light-color">Reviews</h5>
+                                <div class="list-group mb-2">
+                                   {{#each this.reviews}}  {{!-- Iterating reviews arrayField --}}
+                                      {{#ifCond @index '<' 1}}
+                                          <div class="list-group-item">
+                                              {{#if this.userName}}
+                                               <p class="mb-1"> <span class="light-color"><i class="fas fa-user-circle" style="font-size: 24px; margin-right: 8px;"></i> {{ this.userName}}</span> </p>
+                                              {{/if}} 
+                                              {{#if this.image}} 
+                                                <img src="/reviews-images/{{this.image}}" alt="Review Image" class="img-fluid mt-2" style="max-width: 100px; object-fit: cover;"> 
+                                              {{/if}}
+
+                                              <h5 class="mt-1 mb-1">{{this.title}}</h5>
+
+                                              <!-- display star symbol -->
+                                              <div class="text-warning">
+                                                  {{#times this.rating}}
+                                                    <i class="fas fa-star"></i>
+                                                  {{/times}}
+                                                  {{! show empty stars for a 5-star scale --}}
+                                                  {{#times (subtract 5 this.rating)}}
+                                                    <i class="far fa-star"></i>
+                                                  {{/times}}
+                                              </div>
+
+                                              <p class="mb-1">{{this.review}}</p>
+
+                                              {{#if this.adminReply}}
+                                                <div style="box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 8px 12px; border-radius: 6px; ">
+                                                  <strong class="light-color">Seller Response:</strong> {{this.adminReply}}
+                                                </div>
+                                              {{/if}}
+                                          </div>
+                                      {{/ifCond}}
+                                    {{/each}}
+                                </div>
+                                {{#ifCond this.reviews.length '>' 1}}            
+                                  <a href="#" class="show-more-link" data-index="{{@index}}">More...</a>
+                                {{/ifCond}}
+                                  <div id="full-review-list-{{@index}}" class="list-group mt-3 d-none">
+                                      {{#each this.reviews}}
+                                          {{#ifCond @index '>=' 1}}
+                                              <div class="list-group-item">
+                                                  {{#if this.userName}}
+                                                    <p class="mb-1"> <span class="light-color"><i class="fas fa-user-circle" style="font-size: 24px; margin-right: 8px;"></i> {{ this.userName}}</span> </p>
+                                                  {{/if}} 
+                                                  {{#if this.image}} 
+                                                    <img src="/reviews-images/{{this.image}}" alt="Review Image" class="img-fluid mt-2" style="max-width: 100px; object-fit: cover;"> 
+                                                  {{/if}}
+
+                                                  <h5 class="mb-1">{{this.title}}</h5>
+
+                                                  <!-- Star rating -->
+                                                  <div class="text-warning">
+                                                    {{#times this.rating}}
+                                                      <i class="fas fa-star"></i>
+                                                    {{/times}}
+                                                    {{!-- show empty stars for a 5-star scale --}}
+                                                    {{#times (subtract 5 this.rating)}}
+                                                      <i class="far fa-star"></i>
+                                                    {{/times}}
+                                                  </div>
+
+                                                  <p class="mb-1">{{this.review}}</p>
+
+                                                   {{#if this.adminReply}}
+                                                    <div style="box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 8px 12px; border-radius: 6px; ">
+                                                      <strong class="light-color">Seller Response:</strong> {{this.adminReply}}
+                                                    </div>
+                                                  {{/if}}
+                                              </div>
+                                          {{/ifCond}}
+                                      {{/each}}                   
+                                  </div>
+                            </div>
+                      </div>
+                    </div>
+                  </div>
+                {{/each}}               
+    
+                {{else}}
+                  <div class="text-center w-100">
+                    <h4 class="text-muted">No products found.</h4>
+                  </div>
+                {{/if}}
+    
+      </div>
+</div>
+
+
+
+<script>
+// For 'search bar', start with 'debouncing'
+let debounceTimeout;
+function debounceSearch() {
+  clearTimeout(debounceTimeout);
+  debounceTimeout = setTimeout(showSuggestions, 300);
+}
+
+async function showSuggestions() {
+   console.log('Show suggestion called');
+  const input = document.getElementById("search-bar");
+  const query = input.value.trim();
+  const suggestionList = document.getElementById("suggestion-list");
+
+  // If there is no value in search bar
+  if (!query) {  
+    suggestionList.style.display = "none";
+    return;
+  }
+
+  try {
+    const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+    const products = await res.json();  // Here 'res.json()' retrieve an 'array'.
+    
+    // Creates a new list
+    suggestionList.innerHTML = "";
+    if (products.length === 0) {
+      suggestionList.style.display = "none";
+      return;
+    }
+
+    suggestionList.style.display = "block";
+
+    products.forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = highlightMatch(item.name, query);  // Highlight matched item and assign to 'list'.
+      li.addEventListener('click', () => {
+        sendingData(item._id.toString(), products);  // sending data to route, when 'click' the list
+      });
+      suggestionList.appendChild(li);
+    });
+  } catch (err) {
+    console.error('Error in showSuggestions:', err);
+    suggestionList.style.display = "none";
+  }
+}
+
+// Find matching letter and replace with css style
+function highlightMatch(text, inputValue) {
+  const regex = new RegExp(`(${inputValue})`, "gi");
+  return text.replace(regex, `<span class="highlight">$1</span>`);
+}
+
+// For sending data of 'products' array and 'selectedId' to route, through 'form' submission.
+function sendingData(selectedId, products) {  
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/search-results';
+
+  const productsInput = document.createElement('input');
+  productsInput.type = 'hidden';
+  productsInput.name = 'products';
+  productsInput.value = JSON.stringify(products);
+  form.appendChild(productsInput);
+
+  const selectedIdInput = document.createElement('input');
+  selectedIdInput.type = 'hidden';
+  selectedIdInput.name = 'selectedId';
+  selectedIdInput.value = selectedId;
+  form.appendChild(selectedIdInput);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+// For 'Enter' key
+function handleKeyPress(event) {
+  if (event.key === 'Enter') {
+    const suggestionList = document.getElementById("suggestion-list");
+    if (suggestionList.children.length > 0) {
+      suggestionList.children[0].click();
+    }
+  }
+}
+
+
+// For display review section when click 'star' section.
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggles = document.querySelectorAll('.review-toggle');
+
+    toggles.forEach(item => {
+      item.addEventListener('click', () => {
+        const index = item.getAttribute('data-index');
+        toggleReviews(index);
+      });
+    });
+  });
+
+  function toggleReviews(index) {
+  const reviewSection = document.getElementById(`review-section-${index}`);
+  if (reviewSection) {
+    reviewSection.classList.toggle('d-none');
+    reviewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+
+// For display reviews, if more than '5' 
+document.addEventListener('DOMContentLoaded', () => {
+  const showMore = document.querySelectorAll('.show-more-link');
+
+  showMore.forEach(item => {
+    item.addEventListener('click', event => {
+      event.preventDefault(); // For prevent, to search route by browser to express, when clicking the '<a href='(ie 'More...')link. 
+      const index = item.getAttribute('data-index');
+      showMoreReviews(index, event);
+    });
+  });
+});
+
+function showMoreReviews(index, event) {
+  const fullList = document.getElementById(`full-review-list-${index}`);
+  if (fullList) {
+    fullList.classList.remove('d-none');
+    fullList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (event && event.target) {
+    event.target.style.display = 'none';
+  }
+}
+
+
+ // For video play/pause button
+  function togglePlay(index) {
+    console.log('Script loaded in toggle play');  
+    const video = document.getElementById('video-' + index);
+    const icon = document.getElementById('video-icon-' + index);
+
+    if (!video) return;
+
+    if (video.paused) {
+      video.play();
+      icon.classList.remove('fa-play');
+      icon.classList.add('fa-pause');
+    } else {
+      video.pause();
+      icon.classList.remove('fa-pause');
+      icon.classList.add('fa-play');
+    }
+  };
+
+
+// For 'Add to Cart', 'Buy Now' buttons and 'Quantity' selector 
+document.addEventListener('DOMContentLoaded', function () {
+  const productForms = document.querySelectorAll('.product-form');
+
+  productForms.forEach(form => {
+    const productId = form.getAttribute('data-product-id');
+    const quantitySelect = form.querySelector('select[name="quantity"]');
+    const successBox = form.querySelector('.success-box');
+
+    form.addEventListener('submit', async function (e) {
+      const clickedButton = e.submitter;
+
+      // Handle "Add to Cart" button
+      if (clickedButton?.value === 'add-to-cart') {
+        e.preventDefault(); // prevent normal form submission
+
+        const quantity = quantitySelect?.value || 1;
+
+        try {
+          const response = await fetch(`/add-to-cart/${productId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showSuccess(successBox);
+            updateCartCount(data.cartCount);
+          } else {
+            alert("Failed to add to cart.");
+          }
+        } catch (error) {
+          console.error('Error adding to cart:', error);
+        }
+      }
+    });
+  });
+
+  // Dispaly success message
+  function showSuccess(box) {
+    if (box) {
+      box.style.display = 'inline-block';
+      setTimeout(() => {
+        box.style.display = 'none';
+      }, 2000);
+    }
+  }
+
+  // Update cart count
+  function updateCartCount(count) {
+    const badge = document.querySelector('.cart-badge');
+    if (badge) {
+      badge.textContent = count;
+    }
+  }
+});
+</script>
+

@@ -1,0 +1,75 @@
+
+<div class="container mt-5">
+    <h2>Checkout</h2>
+
+    <div id="address-container">
+        <div class="alert alert-warning">
+            Loading address...
+        </div>
+    </div>
+
+    <h3>Order Summary</h3>
+    {{#if products.length}}
+    <table class="table table-bordered">
+
+
+        <thead>
+            <tr>
+                {{!-- <th>Image</th> --}}
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each products}}
+            <tr>
+                <td>
+                    <img src="/{{this.image}}" alt="{{this.name}}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                    {{this.name}}
+                </td>
+                <td>{{this.quantity}}</td>
+                <td>₹{{this.decreasedPrice}}</td>
+                <td>₹{{this.total}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-right"><strong>Grand Total:</strong></td>
+                <td><strong>₹ {{grandTotal}}.00</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <a href="/checkout/payment"  class="btn btn-success">Place Order</a>
+
+     {{else}}
+    <div class="alert alert-warning"> Yout cart is empty
+    <a href="/">Go to shop</a>
+    </div>
+    {{/if}} 
+</div> 
+
+<script>
+//  For retrieve 'address' dynamically
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/get-address')
+    .then(response => response.json())
+    .then(address => {
+        let addressContainer = document.getElementById('address-container');
+
+        if (address) {
+            addressContainer.innerHTML = `<div class="alert alert-info">
+                                            <strong>Shipping Address:</strong><br>
+                                            ${address.fullName}, ${address.houseNo}, ${address.street}, ${address.city}, ${address.state}, ${address.pincode}
+                                          </div>`;
+        } else {
+            addressContainer.innerHTML = `<div class="alert alert-warning">No address provided. <a href="/cart/address">Enter Address</a></div>`;
+        }
+    });
+});
+
+</script>
+
