@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const signupHelper = require('../helpers/signup-helper');
+const nodemailer  = require('nodemailer');
 // var productHelper = require("../helpers/product-helpers");
 // const userHelper = require('../helpers/user-helpers');
 
@@ -36,8 +37,10 @@ router.get('/signup', (req, res) => {
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
+          // user: process.env.EMAIL_USER,
+          // pass: process.env.EMAIL_PASS,
+           user : 'sanjusivaji@gmail.com',
+           pass: 'oycn vtxb cmhz qvuj',
         },
       });
   
@@ -79,7 +82,7 @@ router.get('/signup', (req, res) => {
   
     if (parseInt(otp) === req.session.otp) {
       try {
-        let response = await userHelper.doSignup(req.session.tempUser);
+        let response = await signupHelper.doSignup(req.session.tempUser);
   
         // After successful 'signup', reset sessions and then 'redirecting' to product section
         req.session.loggedIn = true;

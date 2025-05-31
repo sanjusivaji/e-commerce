@@ -17,8 +17,7 @@ module.exports = {
     
                 // Using 'bcrypt' for hashing the password
                 userData.Password = await bcrypt.hash(userData.Password, 10); 
-                //console.log("Password hashed successfully");
-    
+                //console.log("Password hashed successfully");    
                 let result = await db.collection(collections.USER_COLLECTION).insertOne(userData);
     
                 userData._id = result.insertedId;
