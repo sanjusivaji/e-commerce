@@ -17,7 +17,6 @@ router.get('/login',(req, res) => {
 
 // For user login
 router.post('/login', async (req, res) => {
-  console.log(' Received login request:', req.body);
 
   try {
       let response = await loginHelper.doLogin(req.body);
