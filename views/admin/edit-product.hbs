@@ -1,0 +1,129 @@
+
+<div class="container mt-5">
+    <div class="card shadow-lg rounded">
+        <div class="card-header bg-primary text-white">
+        <h4>Edit Product</h4>
+        </div>
+        <div class="card-body">
+
+            <form action="/admin/edit-product/{{product._id}}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" name="name" class="form-control" value="{{product.name}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" name="category" class="form-control" value="{{product.category}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" required>{{product.description}}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" name="price" class="form-control" value="{{product.price}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Discount (%)</label>
+                    <input type="number" name="discount" class="form-control" value="{{product.discount}}" min="0" max="100" >
+                </div>
+
+                <div class="form-group">
+                    <label>TAX (%)</label>
+                    <input type="number" name="taxRate" class="form-control" value="{{product.taxRate}}" min="0" max="100" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Stock</label>
+                    <select name="inStock" class="form-control" required>
+                        <option value="true" {{#if product.inStock}}selected{{/if}}>In Stock</option>
+                        <option value="false" {{#unless product.inStock}}selected{{/unless}}>Out of Stock</option>
+                    </select>
+                </div>
+    
+                 {{!-- For display current images --}}
+                <div class="form-group">
+                    <label>Current Images</label><br>
+                    {{#each product.images}}
+                    <img src="/{{this}}" style="height:50px; width:50px; " required>
+                    {{/each}}
+                </div>
+                {{!-- For display uploading images --}}
+                <div class="form-group">
+                    <label class="light-color"> (Upload Maximum 5 images)</style></label>
+                    <input type="file" name="images" accept="image/*" multiple  id="imageUpload">  {{!-- '<input>' loading/choosing 'type=file' and 'accept="image/*" for limiting the file image 'type',like 'jpg','png' etc only and 'multiple' used for select more than one file at same time --}}
+                    <strong>New Images</strong>
+                    <div id="imagePreview"></div>                                                  {{!-- In '<div>' displaying the new uploaded images--}}
+                </div>
+                
+                {{!-- For display current video --}}
+                <div class="form-group">
+                    <label>Current Video</label><br>
+                    {{#if product.video}}
+                    <video width="200" controls>
+                        <source src="/{{product.video}}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    {{else}}
+                    <p>No video uploaded</p>
+                    {{/if}}
+                </div>
+                {{!-- For display uploading video --}}
+                <div class="form-group">
+                    <label class="light-color">(Upload New Video)</label>
+                    <input type="file" name="video" accept="video/*" id="videoUpload">  {{!--  'accept="video/*"' limiting video type like 'mp4,avg' etc --}}
+                    <strong>New Video</strong>
+                    <div id="videoPreview" style="margin-top: 10px;"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Product</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+ <script>
+    // For display new uploading images 
+    document.getElementById('imageUpload').addEventListener('change', function () {  // 'imageUpload' for uploading image and 'imagePreview' for display that image.
+        const files = this.files;                                                    // 'type = file' with 'multiple' attribute cretes a 'File list'(it's built-in 'js' object, just like an 'array of object')and we can call each item/document by using 'this.files'.  
+        const preview = document.getElementById('imagePreview');
+
+        // If select more than 5 images 
+        if (files.length > 5) { 
+            alert('Max 5 images allowed.');
+            this.value = '';    // 'clear' the '<input>' element ie selected images.
+            return;
+        }
+        Array.from(files).forEach(item => {                                         // 'Array.from(files)' with 'forEach()' for iterating 'File list', for display it.
+            const img = document.createElement('img');                              // Create '<img>' element dynamically.
+            img.src = URL.createObjectURL(item);                                    // 'URL.createObjectURL()' used for create 'temporary url'(so it can be previewed without uploading 'file' into server).
+            img.style.height = '100px';
+            img.style.width = '100px';
+            img.style.margin = '4px';
+            preview.appendChild(img);                                             // 'preview' is the '<div>' element for display the new images and here 'img' element make 'child'(ie put inside the 'preview')of 'preview'.
+        });
+    });
+
+     // For display new uploading video
+    document.getElementById('videoUpload').addEventListener('change',function() {
+        const previews = document.getElementById('videoPreview');
+        const files = this.files;                                    // 'type=file' in '<input>' creates a 'File list'
+        if(files.length > 0){
+            const file = files[0];                                   // Take 'first' file from 'File list'.
+            const video = document.createElement('video');           // Creates a '<video>' tag
+            video.src = URL.createObjectURL(file);                   // 'URL.createObjectURL()' used for create 'temporary url'(so it can be previewed without uploading 'file' into server) and 'file' means 'first' video
+            video.controls = true;                                   // For control panel
+            video.style.width = '200px';
+            previews.appendChild(video);
+        }
+    })
+
+
+
+</script>

@@ -1,0 +1,118 @@
+<div class="container my-4" style="max-width: 500px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 20px; border-radius: 8px;">
+  <h3>Order Details</h3>
+  <p>Order ID: <span class="light-color">{{order._id}}</span></p>
+  <p>Total Amount: ₹{{order.totalAmount}}</p>
+
+  {{!-- Display ordered products,Review,Admin Replay etc  --}}
+   {{#each order.products}} {{!-- 'order' is a 'document'(ie object)contains'_id','userId',totalAmount:','paymentMethod:','status:','address' document and 'products' array,inside 'products' array, contains details of each products,'deliveryStatus','shippedDate' and 'reviews' object,if any 'review' done by user, and inside 'reviews' object contains 'ratings','adminReply' etc. --}}
+      <div class="card my-3 p-3">    {{!-- 'my:3' - margin vertical ie left to right 'mx' for horizontal margin --}}
+         <h5>{{this.name}}</h5>      {{!-- this represents 'current product's name --}}
+        <img src="/{{this.image}}" width="80" />   
+        <p><strong>Price:</strong> ₹{{this.price}}<span style="margin-left: 20px;"><strong> Quantity:</strong> {{this.quantity}}</span></p>
+        <p><strong>Status:</strong> {{this.deliveryStatus}}</p>
+
+       {{!-- Display status date --}}
+        <ul class="list-unstyled ms-3">
+          {{#if this.placedDate}}
+            <li><strong>Placed:</strong> {{this.placedDate}}</li>
+          {{/if}}
+          {{#if this.shippedDate}}
+            <li><strong>Shipped:</strong> {{this.shippedDate}}</li>
+          {{/if}}
+            
+          {{#if (and this.outForDeliveryDate (not this.deliveredDate))}}  {{!-- 'Out for delivery' date not display after 'delivered' --}}
+              <li>
+                <strong>Out for Delivery:</strong> {{this.outForDeliveryDate}}
+                <span style="color: rgb(147, 44, 15);">
+                  <strong>Current scheduled delivery date:    
+                    <span style="color: rgb(17, 192, 90);">{{displayDate this.outForDeliveryDate}}</span> 
+                    (User may update the delivery date)
+                  </strong>
+                </span>
+              </li>
+            {{/if}}
+          
+          {{#if this.deliveredDate}}
+            <li><strong>Delivered:</strong> {{this.deliveredDate}}</li>
+          {{/if}}
+        </ul>
+      </div>
+
+         {{!-- Display message after admin send reply for review  --}}
+         {{#if ../success}}   {{!--'success:true' passes through 'res.render()' when 'adminReply' after user's 'reveiw' and it is same level of 'orders' array  --}}
+              <div class="green-color"><strong>{{../message}}</strong></div>  
+          {{else if ../message}}
+              <div style="color: rgb(212, 17, 17);"><strong>{{../message}}</strong></div>
+          {{/if}}
+
+        {{!-- Review Section only appears if user put review --}}
+        {{#if this.review}}
+        <div class="border p-3 rounded bg-light">
+            <p> <span  class="light-color"><strong>Heading:</span> {{this.review.title}}</strong></p>
+             <p> <span  class="light-color"><strong>Review:</span> {{this.review.review}}</strong></p>
+             <p> <span  class="light-color"><strong>Your Reply:</span> {{this.review.adminReply}}</strong></p>
+
+             {{!-- Admin Reply Form  --}}
+            <form action="/admin/reply-review" method="POST" class="admin-reply-form mt-2">
+                <input type="hidden" name="orderId" value="{{../order._id}}">  {{!-- '<input>' field not appears in the 'form' because 'type='hidden',but data sends when submission of '<form>'. And '_id' is places same level of 'order',but currently we inside 'products' array --}}
+                <input type="hidden" name="productId" value="{{this._id}}">    {{!-- 'this' represent current product --}}
+
+                <label for="adminReply"><strong>Your Reply:</strong></label>
+                <textarea name="adminReply" class="form-control" rows="2"></textarea>
+                
+                <button type="submit" class="btn btn-success btn-sm mt-2">Send Reply</button>
+            </form>
+        </div>     
+        {{/if}}  
+       
+    {{/each}}
+ 
+  {{!-- Form for set up the delivery status --}}
+  {{#unless (eq order.status "Delivered")}}    {{!-- Hide this 'form' if order is Delivered  --}}
+  <form action="/admin/update-order-status" method="POST" class="status-form mt-4" onsubmit="return confirmDelivery()">   {{!-- 'onsubmit',html event attribute,used for confirmation in '<form>', and when click the below button, '<form>' and 'onsubmit' both triggers,and '<form>' only submit if 'function' returns a 'true' --}}
+    <input type="hidden" name="orderId" value="{{order._id}}"> 
+  {{!-- Appear next level status after each status --}}
+    <label for="status"><strong>Update Status for Order:</strong></label>
+    <select name="status" class="form-select w-auto status-select" required>
+      {{#if (not (anyPlacedDate order.products))}}   {{!--  'anyPlacedDate' is custom method, ensures that, not the value 'plaedDate' in 'order.prodcuts' array,and if it is 'true',can select '<options>' --}}
+        <option value="Placed">Placed</option>
+      {{else if (and (anyPlacedDate order.products) (not (anyShippedDate order.products)))}}  {{!--  If the value 'placedDate' and 'not' shippedDate in 'products' array,then we can select the '<option>', 'Shipped'. Ie previous value should needed and current and next values not appears in 'products' array. --}}
+        <option value="Shipped">Shipped</option>
+      {{else if (and (anyShippedDate order.products) (not (anyOutForDeliveryDate order.products)))}}
+        <option value="Out for Delivery">Out for Delivery</option>
+      {{else if (and (anyOutForDeliveryDate order.products) (not (anyDeliveredDate order.products)))}}
+        <option value="Delivered">Delivered</option>
+      {{else}}
+        <option disabled selected>No updates available</option>
+      {{/if}}
+    </select>
+
+    <label for="statusDate" class="mt-2">Select Date:</label>
+     <input type="date" name="statusDate" class="form-control w-auto status-date" required>   {{!-- 'type='date' for display calender --}}
+    
+    <button type="submit" class="btn btn-primary mt-2">Update Order Status</button>
+  </form>
+  {{/unless}}
+</div>
+
+
+<script>
+ // Call each time of 'form' submission,but only works when 'selectedStatus === Delivered'
+  function confirmDelivery() {
+    const selectedStatus = document.querySelector('.status-select').value;
+
+    if (selectedStatus === 'Delivered') {
+      return confirm('Are you delivered?'); // 'confirm' is the built-in 'js' browser method,create a message box, and return 'true' or 'false' value.
+    }
+    return true; // When 'form' submission,'onsubmit' always triggers, whether 'status:placed','shipped' etc,then function should return 'true',otherwise 'form' 'doesnot' submit.
+  };
+
+</script>
+
+
+
+
+
+
+
+

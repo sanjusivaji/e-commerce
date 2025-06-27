@@ -1,0 +1,95 @@
+<div class="container-fluid">
+    {{#each users}}  {{!-- 'users' is the big 'array',it holds seperate 'document'(ie object)for each users and inside 'users' array contains 'name','email','refundStatus' and 'orders' array and this 'orders' array is lot of data like 'address' object(ie 'address' of user) and 'products' array(contains seperate 'document' for each product). Ie if want to retrieve data of 'orders' array we need to iterate and retrieve 'products' array data again iterate inside it--}}
+      <div class="card  mb-4 p-3">
+        <h5>{{this.name}}</h5>
+        <p><strong>Email:</strong> <span class="light-color">{{this.email}}</span></p>
+
+         {{#each this.orders}}  {{!-- Iterate 'orders' array and 'this' represent 'current' order,and may have more than one order for same user --}}
+          <div class="border p-2 mb-2" >
+            <div class="order-box" >
+              <p><strong>Order ID:</strong> <span class="light-color">{{_id}}</span></p>
+              <p><strong>Total Amount:</strong> <span class="light-color">₹{{totalAmount}}</span></p>
+              <p><strong>Address:</strong> <span class="light-color">{{address.fullName}}, {{address.street}}, {{address.city}}, {{address.state}}, {{address.pincode}}</span></p>
+              <p><strong>Phone:</strong> <span class="light-color">{{address.phoneNumber}}</span></p>
+
+              {{!-- Iterate 'products' array to show 'deliveryStatus' --}}
+               {{#unless (eq status "Cancelled")}}  {{!-- It avoid both 'delveryStatus' and 'status:Cancelled' appear at same time in the box --}}
+                  {{#each products}}
+                    {{#if deliveryStatus}}
+                      {{#ifEquals deliveryStatus "Placed"}} 
+                        <div class="alert alert-primary" role="alert"><strong>Placed <span style="margin-left: 100px;">{{name}}</strong></span> </div>
+                      {{/ifEquals}}
+
+                      {{#ifEquals deliveryStatus "Shipped"}}
+                        <div class="alert alert-info" role="alert"><strong>Shipped<span style="margin-left: 100px;">{{name}}</strong></span></div>
+                      {{/ifEquals}}
+
+                      {{#ifEquals deliveryStatus "Out for Delivery"}}
+                        <div class="alert alert-warning" role="alert"><strong>Out for Delivery<span style="margin-left: 100px;">{{name}}</strong></span></div>
+                      {{/ifEquals}}
+
+                      {{#ifEquals deliveryStatus "Delivered"}}
+                        <div class="alert alert-success" role="alert"><strong>Delivered</strong><span style="margin-left: 100px;">{{name}}</span></div>
+                      {{/ifEquals}}
+
+                    
+                    {{else}}
+                      <p class="alert alert-danger" style="color: red;"> <strong> Order Not Placed Yet</strong></p>  {{!-- If there no 'deliveryStatus' means admin not placed the order yet --}}
+                    {{/if}}
+                  {{/each}}
+              {{/unless}}
+
+              {{!-- For 'status:'Cancelled' and 'refundStatus' --}}
+            {{#if status}}   {{!--  'Status' field is appears outside of 'address' object and 'products' array. --}}
+
+                  {{#ifEquals status "Cancelled"}}   {{!-- Ie '{{#ifEquals statement}} printingMessage {{else}} printingMessage {{/ifEquals}}' is the syntax --}}
+                        <div class="alert alert-danger" role="alert"><strong>Cancelled</strong></div>
+
+                        {{#if refundStatus}}    {{!--  'refundStatus' is placed outside of 'orders' array and now it iterate inside 'orders' loop but we don't need '../' because 'orders' iterate inside handlebars(ie '{{}}') --}}
+                          <p class="light-color">Cancelled the order on {{formatDate refundInitiatedDate}}</p>
+                          <h5><strong>Refund Status: {{refundStatus}}</strong></h5>
+                        {{/if}}
+                          {{!-- If 'not' refundStatus: Completed --}}
+                        {{#unless (eq refundStatus "Completed")}}
+                          <h6><strong>Your message:</strong></h6>
+                          <h6 style="color: rgb(198, 36, 36);">
+                            The pickup date is <span class="green-color">{{formatDate pickupDate}}</span> and 
+                            <span style="color: rgb(198, 36, 36);">{{adminMessage}}</span>
+                          </h6>
+                          <a href="/admin/cancel-pickup/{{_id}}" class="btn btn-danger btn-sm mt-2">Show the way for Pickup</a>
+                        {{/unless}}
+
+                  {{else}}    {{!-- This is the 'else' case of 'status "Cancelled"  and both buttons/link go to same link but put different titles in 'button'--}}
+                      {{#ifEquals status "Delivered"}}    
+                          <a href="/admin/order-details/{{_id}}" class="btn btn-info btn-sm mt-2">Details</a>
+                        {{else}}
+                        <div class="d-flex flex-wrap gap-2 mt-2">  {{!--  for wrapping the button, otherwise in phone screen it will appear outside of box --}}
+                          <a href="/admin/order-details/{{_id}}" class="btn btn-info btn-sm ">Show the way For Delivery</a>
+                        </div>
+                        {{/ifEquals}}
+                    {{/ifEquals}}             
+
+              {{else}}  {{!--  Ie if 'not' status case --}}
+                <p>No status</p>
+                <a href="/admin/order-details/{{_id}}" class="btn btn-secondary btn-sm mt-2">View Order Details</a>
+              {{/if}}
+
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{/each}}
+</div>
+
+
+
+<style>
+  .order-box {
+   max-width: 100%;  /* For avoid shrinking of box */
+}
+</style>
+
+
+
+
+

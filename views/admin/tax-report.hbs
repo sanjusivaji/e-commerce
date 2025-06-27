@@ -1,0 +1,39 @@
+<h2 style="text-align: center;color:blue">Tax Report</h2>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Order ID</th>
+      {{!-- <th>User ID</th> --}}
+      <th>Order Placed Date</th>
+      <th>Payment</th>
+      <th>Product</th>
+      <th>Qty</th>
+      <th>Price</th>
+      <th>Tax %</th>
+      <th>Tax (₹)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each orders}}
+      {{#each products}}
+        <tr>
+          <td>{{../_id}}</td>
+          {{!-- <td>{{../userId}}</td> --}}
+          <td>{{formatDateTime ../date}}</td>
+          <td>{{../paymentMethod}}</td>
+          <td>{{productName}}</td>
+          <td>{{quantity}}</td>
+          <td>₹{{decreasedPrice}}</td>
+          <td>{{taxRate}}%</td>
+          <td>₹{{totalProductTax}}</td>
+        </tr>
+       
+      {{/each}}
+    {{/each}}
+     <tr class="fw-bold table-success">
+            <td colspan="7" class="text-end"><strong>Total Tax</strong></td>
+            <td> <strong>₹{{grandTotalTax}}</strong></td>
+        </tr>
+  </tbody>
+</table>

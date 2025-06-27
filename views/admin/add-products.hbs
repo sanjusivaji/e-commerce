@@ -1,0 +1,109 @@
+
+
+<section>
+  <div class="container">
+    <div class="row mt-4">
+      <h2 class="mx-auto">Add New Product</h2>
+    </div>
+
+     <form action="/admin/add-products" method="POST" enctype="multipart/form-data" class="mt-4">   {{!-- 'enctype="multipart/form-data"' used for uploading 'image or video' files with '<form>' --}}
+      <div class="form-group">
+        <label for="name">Product Name</label>
+        <input type="text" name="name" class="form-control" required />
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" name="category" class="form-control" required />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea name="description" class="form-control" rows="3" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price (₹)</label>
+        <input type="number" name="price" class="form-control" required />
+      </div>
+
+      <div class="form-group">
+        <label for="discount">Discount (%)</label>
+        <input type="number" name="discount" class="form-control" min="0" max="100" />
+      </div>
+
+      <div class="form-group" >
+        <label for="taxRate">Tax Percentage</label>
+        <input type="number" name="taxRate" class="form-control" min="0" max="100" required />
+      </div>
+
+      <div class="form-group">
+        <label for="inStock">Stock Status</label>
+        <select name="inStock" class="form-control">
+          <option value="true">In Stock</option>
+          <option value="false">Out of Stock</option>
+        </select>
+      </div>
+
+        {{!-- For display uploading images --}}
+        <div class="form-group">
+            <label for="images" class="light-color"> (Upload Maximum 5 images)</style></label>
+            <input type="file" name="images" accept="image/*" multiple  id="imageUpload" required>  {{!-- '<input>' loading/choosing 'type=file' and 'accept="image/*" for limiting the file image 'type',like 'jpg','png' etc only and 'multiple' used for select more than one file at same time --}}
+            <strong>New Images</strong>
+            <div id="imagePreview"></div>                                                  {{!-- In '<div>' displaying the new uploaded images--}}
+        </div>
+ 
+       {{!-- For display uploading video --}}
+        <div class="form-group">
+            <label for="video" class="light-color">(Upload New Video)</label>
+            <input type="file" name="video" class="form-control-file" accept="video/mp4">  {{!--  'accept="video/*"' limiting video type like 'mp4,avg' etc --}}
+            <strong>New Video</strong>
+            <div id="videoPreview" style="margin-top: 10px;"></div>
+        </div>
+
+      <button type="submit" class="btn btn-success">Add Product</button>
+      <a href="/admin" class="btn btn-secondary ml-2">Cancel</a>
+    </form>
+  </div>
+</section>
+
+
+  <script>
+  // For displaying newly uploaded images
+  document.getElementById('imageUpload').addEventListener('change', function () {
+    const files = this.files;                                       // 'type = file' with 'multiple' attribute cretes a 'File list'(it's built-in 'js' object, just like an 'array of object')and we can call each item/document by using 'this.files'.  
+    const preview = document.getElementById('imagePreview');
+
+    // If select more than 5 images 
+    if (files.length > 5) {
+      alert('Max 5 images allowed.');
+      this.value = '';         // 'clear' the '<input>' element ie selected images.
+      return;
+    }
+    Array.from(files).forEach(item => {            // 'Array.from(files)' with 'forEach()' for iterating 'File list', for display it.
+      const img = document.createElement('img');   // Create '<img>' element dynamically.
+      img.src = URL.createObjectURL(item);         // 'URL.createObjectURL()' used for create 'temporary url'(so it can be previewed without uploading 'file' into server).
+      img.style.height = '100px';
+      img.style.width = '100px';
+      img.style.margin = '4px';
+      preview.appendChild(img);                    // 'preview' is the '<div>' element for display the new images and here 'img' element make 'child'(ie put inside the 'preview')of 'preview'.
+    });
+  });
+  
+
+  // For displaying uploaded video
+  document.querySelector('input[name="video"]').addEventListener('change', function () {
+    const previews = document.getElementById('videoPreview');
+    const files = this.files;
+
+    if (files.length > 0) {                            // 'type=file' in '<input>' creates a 'File list'
+      const file = files[0];                           // Take 'first' file from 'File list'.
+      const video = document.createElement('video');   // Creates a '<video>' tag
+      video.src = URL.createObjectURL(file);           // 'URL.createObjectURL()' used for create 'temporary url'(so it can be previewed without uploading 'file' into server) and 'file' means 'first' video
+      video.controls = true;                           // For control panel
+      video.style.width = '200px';
+      previews.appendChild(video);
+    }
+  });
+</script>
+   
