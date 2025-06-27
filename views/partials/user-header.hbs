@@ -1,0 +1,114 @@
+<header>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+
+   
+    <a class=" me-auto light-color" href="/" style="font-size: 25px;">
+      <i class="fas fa-home"></i>
+    </a>
+
+    <!-- Right: Orders and Cart (always visible) -->
+    <ul class="navbar-nav flex-row align-items-center mb-0 ms-auto d-flex">
+      {{#if user}}
+      <li class="nav-item mx-2">
+        <a class="nav-link" href="/orders">Orders</a>
+      </li>
+      <li class="nav-item mx-2 cart-wrapper position-relative">
+        <a class="nav-link ms-auto" href="/cart">
+          <i class="fas fa-shopping-cart" style="font-size: 20px; color: green;"></i>
+          {{#if cartCount}}
+          <span class="cart-badge">{{cartCount}}</span>
+          {{/if}}
+        </a>
+      </li>
+      {{/if}}
+    </ul>
+
+    <!-- Toggler for user/account only -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#userMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Collapsible content: user/account only -->
+    <div class="collapse navbar-collapse justify-content-end" id="userMenu">
+      <ul class="navbar-nav align-items-center mb-0">
+        <li class="nav-item mx-2">
+          <span class="navbar-text fw-bold">
+            {{#if user}}{{user.name}}{{else}}Account{{/if}}
+          </span>
+        </li>
+
+        {{#if user}}
+        <li class="nav-item mx-2">
+          <a class="btn btn-outline-danger btn-sm" href="/logout">Logout</a>
+        </li>
+        {{else}}
+        <li class="nav-item mx-1">
+          <a class="btn btn-outline-primary btn-sm" href="/login">Login</a>
+        </li>
+    
+        {{/if}}
+      </ul>
+    </div>
+
+  </nav>
+</header>
+
+
+<style>
+
+   .cart-badge {
+    position: absolute;
+      top: -15px; 
+      left: 12px;
+   }
+@media (max-width: 1300px) {
+    .cart-badge {
+      position: absolute;
+      top: -15px; 
+      left: 5px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: auto;
+      z-index: 1000;
+    }
+  
+    .top-right-menu {
+      flex-direction: row !important;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 50px;
+    }
+  
+    .top-right-menu .nav-item {
+      display: inline-block !important;
+    }
+  
+
+    .review-container{
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .list.group.d-none{
+      display: none !important;
+    }
+}
+  
+</style>
+
+<!-- FontAwesome for cart icon -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<!-- jQuery (Required for Bootstrap 4) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ 
+<script>
+/*  $(document).ready(function() {  // This is a 'JQuery' code for 'dropdown' functionality, and this 'line' ensures 'script' runs after page is fully loaded, and ".dropdown-toggle" is the 'bootstrap' class for dropdown 'button' and "dropdown()" is the 'bootstrap' js method for dropdown behaviour.And we should put 'link'(ie above version "jquery-3.6.0.min.") of 'JQuery' before 'JQuery' code and in modern webdevolopement, we use frameworks like 'React','Angular' etc instead, 'JQuery'. 
+    $('.dropdown-toggle').dropdown();
+  });
+</script>   
+
+
+</body>
+</html>
