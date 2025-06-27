@@ -16,12 +16,12 @@ module.exports = {
                 let db = getDb();
     
                 // Using 'bcrypt' for hashing the password
-                userData.Password = await bcrypt.hash(userData.Password, 10); 
-                //console.log("Password hashed successfully");    
+                userData.Password = await bcrypt.hash(userData.Password, 10);   
                 let result = await db.collection(collections.USER_COLLECTION).insertOne(userData);
     
-                userData._id = result.insertedId;
-                res(userData);
+                userData._id = result.insertedId;  // Assigned newly created '_id' of document for avoid another query. 
+                
+                res(userData);   // return 'userData' document.
             } catch (error) {
                 console.error("Error in doSignup:", error);
                 rej(error);
@@ -34,7 +34,7 @@ module.exports = {
     try {
       const db = getDb();
       const user = await db.collection(collections.USER_COLLECTION).findOne({ email });
-      return !!user;
+      return !!user; // 'findOne()' returns 'document', but we want only 'true' or 'false' value.
     } catch (err) {
       throw new Error('Database error during email check');
     }

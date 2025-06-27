@@ -2,10 +2,6 @@ const express = require('express');
 const router = express.Router();
 const signupHelper = require('../helpers/signup-helper');
 const nodemailer  = require('nodemailer');
-// var productHelper = require("../helpers/product-helpers");
-// const userHelper = require('../helpers/user-helpers');
-
-
 
 
 
@@ -25,28 +21,26 @@ router.get('/signup', (req, res) => {
     }
   
     try {
-      const emailExists = await signupHelper.checkEmailExists(email);
+      const emailExists = await signupHelper.checkEmailExists(email);  // Function returns 'true' or 'false'
       if (emailExists) {
         return res.render('user/signup', { error: 'Email already registered' });
       }
   
-      const otp = Math.floor(100000 + Math.random() * 900000);
+      const otp = Math.floor(100000 + Math.random() * 900000); // “Math.random()” creates ‘random’ numbers from “0” to “1”(ie “0.1”, “0.555” etc) and ‘multiply’ this into “900000” eg, 0.555 * 900000 = 499,500 and ‘plus’ “100000” ie 499500 + 100000 = 599 500 and if any ‘decimal point’ occurs “Math.floor()” remove it.
       req.session.tempUser = { name, email, Password };  // For invoke 'doSignup()'.
       req.session.otp = otp; // For compare 'otp' that recieved through email and stored in 'session'.
   
-      const transporter = nodemailer.createTransport({
+      const transporter = nodemailer.createTransport({ // Creates an 'object' contains data of sender email,service provider, password etc.
         service: 'gmail',
         auth: {
-          // user: process.env.EMAIL_USER,
-          // pass: process.env.EMAIL_PASS,
-           user : 'sanjusivaji@gmail.com',
-           pass: 'oycn vtxb cmhz qvuj',
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,          
         },
       });
   
-      // Sending otp to user 'email'
-      await transporter.sendMail({
-        from: 'your.email@gmail.com',
+    
+      const mailOptions = {  // details of email
+        from: process.env.EMAIL_USER,
         to: email,
         subject: 'Verify Your Email',
         html: `
@@ -60,8 +54,10 @@ router.get('/signup', (req, res) => {
             <p style="font-size: 14px; color: #888;">If you didn’t request this, please ignore this email.</p>
           </div>
         `,
-      });
-  
+      };
+
+      await transporter.sendMail(mailOptions); // 'sendMail' used for sending mail with 'transporter' object and 'mailOptions', and returns 'Promise' object(ie 'resolved' or 'reject').
+        
       res.redirect('/verify-email');
     } catch (err) {
       console.error('Signup process failed:', err);
@@ -80,9 +76,9 @@ router.get('/signup', (req, res) => {
   router.post('/verify-otp', async (req, res) => {
     const { otp } = req.body;
   
-    if (parseInt(otp) === req.session.otp) {
+    if (parseInt(otp) === req.session.otp) {  // Compare both ‘otp’ that get from “req.body”(ie it’s from ‘email’) and ‘otp’ that already stored in ‘session’(ie “req.session.otp”)
       try {
-        let response = await signupHelper.doSignup(req.session.tempUser);
+        let response = await signupHelper.doSignup(req.session.tempUser); // Function returns a 'document' contains user data.
   
         // After successful 'signup', reset sessions and then 'redirecting' to product section
         req.session.loggedIn = true;
@@ -93,7 +89,7 @@ router.get('/signup', (req, res) => {
         res.redirect('/');
       } catch (error) {
         console.error("Signup failed after OTP verification:", error);
-        res.render('user/signup', { error: error });  // <-- this shows the error in your signup form
+        res.render('user/signup', { error: error });  
       }
     } else {
       res.render('user/verify-email', { error: 'Invalid OTP. Please try again.' });
