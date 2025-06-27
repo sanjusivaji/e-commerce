@@ -1,0 +1,79 @@
+<div class="card mx-auto p-3" style="max-width: 500px;">
+  <h4 class="mb-3 text-center">Product Review</h4>
+  {{!-- Display error and success message --}}
+  {{#if success}}
+        <div class="green-color"> <strong>{{message}}</strong></div>
+  {{else}} 
+        <div style="color: rgb(212, 17, 17);"> <strong>{{message}}</strong></div>
+  {{/if}}
+
+  {{!-- Display if review exist --}}
+  {{#if review}}
+  
+      <h4 style="text-align: center;color:blueviolet">You already submitted </h4>
+      <hr>    {{!-- for a line --}}
+      <div class="alert alert-info">
+          <p><strong>Rating:</strong> {{review.rating}} ★</p>
+          <p><strong>Title:</strong> {{review.title}}</p>
+          <p><strong>Review:</strong> {{review.review}}</p>
+
+          {{#if review.image}}
+            <p><strong>Your Image:</strong><br>
+            <img src="/reviews/{{review.image}}" class="product-img me-3" style="width:80px; height:80px; object-fit:cover;" alt="Review Image">
+            </p>
+          {{/if}}
+
+          {{#if review.adminReply}}
+            <p class="text-success"><strong>Admin Reply:</strong> {{review.adminReply}}</p>
+          {{/if}}
+      </div>
+  {{else}}
+
+
+   {{!-- Display Review Form (Only if no review) --}}
+    <form action="/review/{{orderId}}/{{productId}}" method="POST" enctype="multipart/form-data">
+      
+              <!-- For Star Rating -->
+              <div class="mb-2">
+                <label for="rating">Star Rating:</label><br>
+                <div class="star-rating">
+                   {{#each stars}}                    {{!-- Iterating the 'stars' array --}}
+                    <input type="radio" name="rating" value="{{this}}" id="star{{this}}" required>  {{!-- When click the 'star' symbol(ie 'radio' button retrieve that value by using 'value'(ie 'value='{{this}}') attribute in '<input>' and 'label' used for display that 'star', and 'id' in '<input>' tag and 'for' in '<label>' connect each other. --}}
+                    <label for="star{{this}}">★</label>
+                  {{/each}}
+                </div>
+              </div>
+
+              <!-- For Image Upload -->
+              <div class="mb-2">
+                <label for="image">Upload Image (optional):</label>
+                 <input type="file" name="image" accept=".jpg, .jpeg" class="form-control">   {{!-- 'accept=".jpg, .jpeg"  allows only 'jpg' or 'jpeg' files/images --}}
+              </div>
+
+              <!-- For Title -->
+              <div class="mb-2">
+                <label for="title">Review Title</label>
+                <input type="text" name="title" class="form-control" maxlength="100" required>
+              </div>
+
+              <!-- For review description -->
+              <div class="mb-2">
+                <label for="review">Write your review:</label>
+                <textarea name="review" rows="3" class="form-control" required></textarea>    {{!-- 'rows="3"' for '3' rows/line height as initial box size in 'textarea'   --}}
+              </div>
+
+              <button type="submit" class="btn btn-success">Submit Review</button>
+    </form>
+  {{/if}}
+</div>
+
+
+<script>
+  setTimeout(() => {
+    const alertBox = document.querySelector('.green-color');
+    if (alertBox) {
+      alertBox.style.display = 'none';
+    }
+  }, 2000);
+</script>
+

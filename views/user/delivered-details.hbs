@@ -1,0 +1,67 @@
+
+
+<div class="card mx-auto mt-4 p-3 shadow" style="max-width: 500px;">
+  <h3 class="mb-3">Delivered Order Details</h3>
+
+  {{#each order.products}}
+    <div class="card mb-3 p-2 shadow-sm">
+      <div class="d-flex align-items-center">
+        <img src="/{{this.image}}" alt="{{this.name}}" class="product-img me-3" style="width:100px; height:100px; object-fit:cover;">
+        <div>
+          <h5><strong class="light-color">{{this.name}}</strong></h5>
+          <p><strong class="light-color">Price:</strong> ₹{{this.decreasedPrice}}</p>
+          <p ><strong class="light-color">Quantity:</strong> {{quantity}}</p>
+          <form action="/review/{{../order._id}}/{{this._id}}" method="get">      {{!--  Triggers '/user/review' route and sending 'order.id' and 'product._id', when click the 'Rate this Product' button --}}
+            <button class="btn btn-sm btn-primary">Rate this Product</button> 
+          </form>
+        </div>
+      </div>
+    </div>
+
+    
+  {{/each}}
+
+  <p><strong>Order ID:</strong> <span class="light-color"> {{order._id}} </span></p>
+  <p><strong>Delivered On:</strong> <span class="light-color">{{formatDate order.date}} </span></p>
+</div>
+
+
+<!-- Return and Policy Links Outside the Card -->
+<div class="text-center mt-3">
+  <button class="btn btn-danger btn-sm" onclick="cancelOrder('{{@root.order._id}}')">Cancel Order</button>
+  <a href="/return-policy" class="btn btn-link">Return Policy</a>
+
+  {{#ifEquals order.status "Delivered"}}
+    {{#with (lookup order.products 0)}}
+      <a href="/invoice/{{../order._id}}/{{_id}}" class="btn btn-success btn-sm me-2">View Invoice</a>
+
+    {{/with}}
+  {{/ifEquals}}
+
+</div>
+
+
+<script>
+    function cancelOrder(orderId) {
+    if (confirm('Are you sure, cancel the entire order?')) {
+      fetch('/cancel-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Order cancelled. Refund initiated.');
+          location.reload();
+        } else {
+          alert('Order cancellation failed.');
+        }
+      })
+      .catch(err => {
+        console.error('Error cancelling order:', err);
+        alert('Something went wrong.');
+      });
+    }
+  }
+</script>

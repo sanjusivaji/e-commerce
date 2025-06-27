@@ -1,0 +1,72 @@
+<h2 class="text-center">My Orders</h2>
+<div class="row">
+  {{#each orders}}
+
+    {{!--  Display for delivery status 'Out for delivery,Placed and Shipped' --}}
+    {{#if (and (ne status "Delivered") (ne deliveryStatus "Cancelled"))}}
+      <div class="col-md-6">
+        <div class="card mb-3 p-3" style="max-width: 320px; margin: auto;">
+          <h5 style="color: rgb(48, 167, 63);">
+            {{#if products.[0].deliveryStatus}}
+                {{#if (eq products.[0].deliveryStatus "Out for Delivery")}}
+                  <span style="color: rgb(255, 136, 0);">Out for delivery: {{formatDate products.[0].outForDeliveryDate}}</span>
+                {{else if (or (eq products.[0].deliveryStatus "Placed") (eq products.[0].deliveryStatus "Shipped"))}}
+                  Arriving on: {{addSevenDays products.[0].date}}
+                {{/if}}
+              
+            {{else}}                  {{!-- For no delivery status case but 'status: 'Placed'' --}}
+            Expect Arriving on: {{addSevenDays products.[0].date}}  
+            {{/if}}
+          </h5>
+
+          <small><p style="color: rgb(100, 91, 91);">Order ID: {{_id}}</p></small>
+
+          {{#if products.[0].image}}
+            <img src="/{{products.[0].image}}" alt="Product Image" class="img-fluid mb-2" style="max-height: 100px;max-width:100px">
+          {{/if}}
+
+          <div class="d-flex justify-content-end mt-auto">
+            <a href="/order-details/{{_id}}" class="btn btn-sm" style="background-color: #eaf1f0; color: rgb(94, 90, 90); box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);">View Details</a>
+          </div>
+        </div>
+      </div>
+    {{/if}}
+
+    {{!-- Display delivery status Delivered --}}
+    {{#ifEquals status "Delivered"}}   
+      <div class="col-md-6">
+        <div class="card mb-3 p-3" style="max-width: 320px; margin: auto;">
+          <h5 style="color: rgb(178, 38, 3);">Delivered on: {{formatDate date}}</h5>
+          <small><p style="color: rgb(100, 91, 91);">Order ID: {{_id}}</p></small>
+
+          {{#if products.[0].image}}
+            <img src="/{{products.[0].image}}" alt="Product Image" style="width: 100px;">
+          {{/if}}
+
+          <div class="d-flex justify-content-end mt-auto">
+            <a href="/delivered-details/{{_id}}" class="btn btn-sm" style="background-color: #eaf1f0; color: rgb(94, 90, 90); box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);">View Details</a>
+          </div>
+        </div>
+      </div>
+    {{/ifEquals}}
+
+    {{!-- Display delivery status Cancelled --}}
+    {{#ifEquals deliveryStatus "Cancelled"}}   
+      <div class="col-md-6">
+        <div class="card mb-3 p-3" style="max-width: 320px; margin: auto;">
+          <h5 style="color: rgb(243, 65, 20);">Cancelled {{formatDate date}}</h5>
+          <small><p style="color: rgb(100, 91, 91);">Order ID: {{_id}}</p></small>
+
+          {{#if products.[0].image}}
+            <img src="/{{products.[0].image}}" alt="Product Image" style="width: 100px;">
+          {{/if}}
+
+          <div class="d-flex justify-content-end mt-auto">
+            <a href="/cancel-details/{{_id}}" class="btn btn-sm" style="background-color: #eaf1f0; color: rgb(94, 90, 90); box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);">View Details</a>    {{!-- For only after 'Cancel' the order --}}
+          </div>
+        </div>
+      </div>
+    {{/ifEquals}}
+
+  {{/each}} 
+</div>

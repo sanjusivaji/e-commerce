@@ -1,0 +1,179 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      <div class="card shadow-lg overflow-hidden" style="border-radius: 20px;">
+        <!-- Media Carousel -->
+        <div id="product-carousel" class="carousel slide" data-ride="carousel" data-interval="false">
+          <div class="carousel-inner">
+            {{#each product.images}}
+              <div class="carousel-item {{#if @first}}active{{/if}}">
+                <div class="position-relative">
+                  <img src="{{this}}" class="d-block w-100" style="max-height: 350px; object-fit: cover;">
+                  <div class="position-absolute" style="top: 0; left: 0; background: rgba(0,0,0,0.1); color: white; padding: 4px 8px;">
+                    <h2 class="mb-0">{{../product.name}}</h2>
+                  </div>
+                  <div class="position-absolute" style="top: 0; right: 0; background: red; color: white; padding: 4px 8px; font-size: 14px;">
+                    -{{../product.discount}}%
+                  </div>
+                </div>
+              </div>
+            {{/each}}
+
+            {{#if product.video}}
+              <div class="carousel-item {{#unless product.images.length}}active{{/unless}}">
+                <div class="position-relative">
+                  <video id="video-0" class="d-block w-100" style="height: 350px; object-fit: cover;">
+                    <source src="{{product.video}}" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                  <button class="video-toggle-btn position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);" onclick="togglePlay('0')">
+                    <i id="video-icon-0" class="fas fa-play"></i>
+                  </button>
+                </div>
+              </div>
+            {{/if}}
+          </div>
+          <a class="carousel-control-prev" href="#product-carousel" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </a>
+          <a class="carousel-control-next" href="#product-carousel" role="button" data-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </a>
+          <ol class="carousel-indicators">
+            {{#each product.images}}
+              <li data-target="#product-carousel" data-slide-to="{{@index}}" class="{{#if @first}}active{{/if}}"></li>
+            {{/each}}
+            {{#if product.video}}
+              <li data-target="#product-carousel" data-slide-to="{{product.images.length}}"></li>
+            {{/if}}
+          </ol>
+        </div>
+
+        <!-- Product Content -->
+        <div class="card-body">
+          <h5 class="card-text">{{product.description}}</h5>
+
+          <!-- Star Rating -->
+          <div class="d-flex justify-content-end align-items-center rating-summary">
+            <span class="me-1 fw-bold text-dark">{{product.avgRating}}</span>
+            <span class="me-1">{{{starIcons product.avgRating}}}</span>
+            <span style="color: rgb(143, 152, 152);">({{product.reviewCount}})</span>
+          </div>
+
+          <!-- Price and Discount -->
+          <div class="mt-2">
+            <h4><strong>₹{{discountedPrice product.price product.discount}}</strong></h4>
+            <h6 class="text-muted">MRP: <span style="text-decoration: line-through;">₹{{product.price}}</span></h6>
+            <h6><strong><span class="text-danger">{{product.discount}}% Off</span></strong></h6>
+          </div>
+
+          <!-- Stock -->
+          <p class="{{#if product.inStock}}text-success{{else}}text-danger{{/if}}">
+            {{#if product.inStock}}In stock{{else}}Out of stock{{/if}}
+          </p>
+
+          <!-- Add to Cart / Buy Now -->
+          {{#if (and user product.inStock)}}
+            <form method="POST" class="product-form" data-product-id="{{product._id}}">
+              <div class="mb-2">
+                <select class="form-select quantity-select" name="quantity" style="color: black;">
+                  {{#range 1 10}}
+                    <option value="{{this}}">Quantity: {{this}}</option>
+                  {{/range}}
+                </select>
+              </div>
+              <div class="success-box">Added successfully!</div>
+              <button type="submit" name="action" value="add-to-cart" class="btn w-100 text-black mb-2" style="background-color: #FFD814; border-radius: 999px;">
+                Add to Cart
+              </button>
+              <button type="submit" formaction="/buy-now/{{product._id}}" class="btn w-100 text-black" style="background-color: #FFA41C; border-radius: 999px;">
+                Buy Now
+              </button>
+            </form>
+          {{else}}
+            <a href="/login" class="btn w-100 text-black mb-2" style="background-color: #FFD814; border-radius: 999px;">Add to Cart</a>
+            <a href="/login" class="btn w-100 text-black" style="background-color: #FFA41C; border-radius: 999px;">Buy Now</a>
+          {{/if}}
+
+          <!-- Review Section -->
+          <div class="mt-4">
+            <h5 class="light-color">Reviews</h5>
+            <div class="list-group mb-2">
+              {{#each product.reviews}}
+                {{#ifCond @index '<' 5}}
+                  <div class="list-group-item">
+                    {{#if this.userName}}
+                      <p class="mb-1 fw-bold">
+                        <span class="light-color"><i class="fas fa-user-circle me-2"></i>{{this.userName}}</span>
+                      </p>
+                    {{/if}}
+                    {{#if this.image}}
+                      <img src="/reviews-images/{{this.image}}" class="img-fluid mt-2" style="max-width: 100px; object-fit: cover;">
+                    {{/if}}
+
+                    <h5 class="mb-1">{{this.title}}</h5>
+
+                    <!-- Stars -->
+                    <div class="text-warning">
+                      {{#times this.rating}}<i class="fas fa-star"></i>{{/times}}
+                      {{#times subtract 5 this.rating}}<i class="far fa-star"></i>{{/times}}
+                    </div>
+
+                    <p class="mb-1">{{this.review}}</p>
+
+                    {{#if this.adminReply}}
+                      <div class="alert alert-info mt-2">
+                        <strong class="light-color">Seller Response:</strong> {{this.adminReply}}
+                      </div>
+                    {{/if}}
+                  </div>
+                {{/ifCond}}
+              {{/each}}
+
+              {{#ifCond product.reviews.length '>' 5}}
+                <a href="#" onclick="document.getElementById('more-reviews').classList.remove('d-none')">More...</a>
+              {{/ifCond}}
+
+              <div id="more-reviews" class="list-group d-none mt-3">
+                {{#each product.reviews}}
+                  {{#ifCond @index '>=' 5}}
+                    <div class="list-group-item">
+                      <h5>{{this.title}}</h5>
+                      <div class="text-warning">
+                        {{#times this.rating}}<i class="fas fa-star"></i>{{/times}}
+                        {{#times subtract 5 this.rating}}<i class="far fa-star"></i>{{/times}}
+                      </div>
+                      <p>{{this.review}}</p>
+                      {{#if this.adminReply}}
+                        <div class="alert alert-info mt-2">
+                          <strong>Seller Response:</strong> {{this.adminReply}}
+                        </div>
+                      {{/if}}
+                    </div>
+                  {{/ifCond}}
+                {{/each}}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePlay(index) {
+    const video = document.getElementById(`video-${index}`);
+    const icon = document.getElementById(`video-icon-${index}`);
+    if (video.paused) {
+      video.play();
+      icon.classList.remove('fa-play');
+      icon.classList.add('fa-pause');
+    } else {
+      video.pause();
+      icon.classList.remove('fa-pause');
+      icon.classList.add('fa-play');
+    }
+  }
+</script>

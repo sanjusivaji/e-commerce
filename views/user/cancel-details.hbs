@@ -1,0 +1,69 @@
+
+
+<div class="container">
+      <div class="order-box">
+        <p class="order-id light-color">Order ID: {{order._id}}</p>
+
+        {{!-- Display product details by iterate 'products' array in 'order' object --}}
+        {{#each order.products}}
+          <div class="product-box d-flex align-items-center mb-3">
+            <img src="/{{this.image}}" alt="{{this.name}}" class="product-img me-3" style="width:80px; height:80px; object-fit:cover;">
+            <div>
+              <h5 class="product-name">{{this.name}}</h5>
+              <p class="m-0">Price: ₹{{this.price}}</p>
+              <p class="m-0">Quantity: {{this.quantity}}</p>
+            </div>
+          </div>
+        {{/each}}
+
+        {{!-- Display 'refundStatus' and 'refundInitiatedDate' with 'tick' in the 'circle' --}}
+        <div class="order-tracking-box">
+          {{#ifEquals order.refundStatus "Initiated"}}
+            <div class="tracking-step">
+              <div class="step-wrapper">
+                <div class="circle completed"><span class="tick">✓️</span></div>
+                <div class="refund-init" style="margin-left: 40px;">Refund Initiated on: {{displayDate order.refundInitiatedDate}}</div>
+              </div>
+            </div>
+          {{/ifEquals}}
+
+          {{!-- Display 'adminMessage' and 'pickupDate' --}}
+          {{#unless (eq order.refundStatus "Completed")}}   {{!-- Not display 'adminMessage' and 'pickupDate' after 'refundStatus:completed' --}}
+            {{#if order.pickupDate}}
+              <div class="tracking-step">
+                <div class="step-wrapper">
+                  <div class="circle completed"><span class="tick">✓️</span></div>
+                  <div class="step-text">
+                    Pickup Scheduled on {{displayDate order.pickupDate}}
+                    {{#if order.adminMessage}}<h5 class="green-color">{{order.adminMessage}}</h5>{{/if}}
+                  </div>
+                </div>
+              </div>
+            {{/if}}
+          {{/unless}}
+
+          {{!-- Display 'Refund completed' with date --}}
+          {{#ifEquals order.refundStatus "Completed"}}
+            <div class="tracking-step">
+              <div class="step-wrapper">
+                <div class="circle completed"><span class="tick">✓️</span></div>
+                <div class="step-text">Refund Completed – {{displayDate order.refundCompletedDate}}</div>
+              </div>
+            </div>
+          {{/ifEquals}}
+        </div>
+      </div>
+  
+</div>
+
+
+<style>
+.order-box {
+  max-width: 100%;        /* Prevents unnecessary shrinking of box(especially in 'small screen' size) */ 
+}
+
+</style>
+
+
+
+

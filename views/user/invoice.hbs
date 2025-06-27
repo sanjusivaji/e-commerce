@@ -1,0 +1,150 @@
+<div class="container border p-3" style="background-color: #fdfdfd; border-radius: 10px;">
+<img src="https://bwipjs-api.metafloor.com/?bcid=code128&text={{order._id}}&scale=1&height=6&includetext" alt="Barcode">
+
+    <h2>Tax Invoice</h2>
+  <p>Invoice Number: <span class="light-color">{{order._id}}</span></p>  
+  <p>Invoice Date: <span class="light-color">{{ order.date}}</span></p>
+
+  <div class="row">
+    <!-- Seller Address -->
+    <div class="col-md-6 border p-3 mb-3" style="border-radius: 5px;">
+      <h6 style="color: #e36e6e;">Seller Address</h6>
+      <p><strong>{{order.seller.companyName}}</strong></p>
+      <p>{{order.seller.road}}, {{order.seller.place}}</p>
+      <p>{{order.seller.city}} - {{order.seller.pincode}}, {{order.seller.state}}, {{order.seller.nation}}</p>
+      <p>Phone: {{order.seller.phone}}</p>
+      <p>Email: {{order.seller.email}}</p>
+      <p>GSTIN: {{order.seller.gstin}}</p>
+    </div>
+
+    <!-- Shipping Address -->
+    <div class="col-md-6 border p-3 mb-3" style="border-radius: 5px;">
+      <h6 style="color: #e36e6e;">Shipping Address</h6>
+      <p><strong>{{order.address.fullName}}</strong></p>
+      <p>{{order.address.houseNo}}, {{order.address.street}} - {{order.address.landmark}}</p>
+      <p>{{order.address.city}} - {{order.address.pincode}}, {{order.address.state}}. </p>
+      <p>{{order.address.phoneNumber}}</p>
+      {{!-- <p>{{order.userEmail}}</p> --}}
+    </div>
+  </div>
+
+  <table class="table table-bordered my-3">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Actual Price</th>
+        <th>Tax % (₹ )</th>
+        <th>Price after tax</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each order.products}}
+        <tr>
+          <td>{{name}}</td>
+          <td>{{quantity}}</td>
+          <td>₹{{priceExclTax}}</td>
+          <td> {{taxRate}}% (₹{{totalProductTax}})</td>
+          <td>₹{{totalAmount}}</td>
+        </tr>
+      {{/each}}
+      <tr>
+        <td colspan="3" class="text-end"></td>
+        <td>₹{{order.totalTax}}</td>
+        <td>₹{{order.subTotal}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Total:</strong> ₹{{order.subTotal}}</p>
+  <p><strong>Shipping:</strong> ₹{{order.shippingCost}}</p>
+  <p><strong>Promotion Discount:</strong> -₹{{order.promotionDiscount}}</p>
+  <p style="color: #ab3f3f;"><strong>Grand Total:</strong> ₹{{order.grandTotal}}</p>
+</div>
+
+<!-- Download Button (Outside main container) -->
+ {{#unless isPdf}}                     {{!-- 'Download PDF' button only shows when display the 'invoice', 'not' in 'pdf' --}}
+ {{#with (lookup order.products 0)}}   {{!--  '#with' is 'built-in' and when use 'order.products' with '#with',then we don't need 'order.products._id'(ie just '_id') and 'lookup' is also built-in handlebar helper function used for access value dynamically, ie 'product 0'(ie '0th'index/first product in 'products' array)for '_id'  --}}
+<div class="mt-3">
+   <a href="/invoice-pdf/{{../order._id}}/{{_id}}" class="btn btn-outline-dark btn-sm" target="_blank">   {{!-- using '../' because '#with'  --}}
+    Download PDF
+  </a>
+</div>
+{{/with}}
+{{/unless}}
+
+
+
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 40px;
+    color: #333;
+  }
+
+  h2 {
+    text-align: center;
+    text-transform: uppercase;
+    color: #333;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+  }
+
+  h4, h5 {
+    margin-bottom: 5px;
+    color: #444;
+  }
+
+  p {
+    margin: 2px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  th {
+    background-color: #f8f8f8;
+    text-transform: uppercase;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-top: 20px;
+    display: inline-block;
+  }
+
+  .btn-outline-dark {
+    border: 1px solid #333;
+    color: #333;
+  }
+
+  .btn-outline-dark:hover {
+    background-color: #333;
+    color: #fff;
+  }
+
+  .summary {
+    margin-top: 20px;
+    font-size: 15px;
+  }
+
+  .summary p {
+    margin: 6px 0;
+  }
+</style> 
+
+

@@ -1,0 +1,243 @@
+
+
+
+
+
+<div class="container my-4 p-3" style="border:1px solid #ddd; border-radius:10px;">
+  <h3 class="green-color">Order Tracking</h3>
+  <p class="light-color">Order ID: {{order._id}}</p>
+
+   {{#each order.products}}                   {{!-- Iterating on 'products' array,that in 'order' document --}}
+   <div class="card tracking-card mb-4">      {{!-- 'tracking card' and 'product-info' are custom classes and 'me-3' means 'margin end'  --}}
+      <div class="product-info d-flex align-items-center mb-3">
+        <img src="/{{this.image}}" alt="{{this.name}}" class="product-img me-3" style="width:80px; height:80px; object-fit:cover;">
+        <div>
+          <h5 class="product-name">{{this.name}}</h5>
+          <p class="m-0">Price: ₹{{this.decreasedPrice}}</p>
+          <p class="m-0">Quantity: {{this.quantity}}</p>
+        </div>
+      </div>
+
+      <div class="tracking-container">
+
+        <!-- Placed -->
+        <div class="tracking-step">       {{!-- 'tracking-step' and 'step-wrapper' are custom class --}}
+          <div class="step-wrapper">
+            <div class="circle  {{#ifStatusReached this.deliveryStatus 'Placed'}}completed    {{!-- Initially it is 'circle'(ie 'custom class' for 'white' color circle)and it works like "statusOrder.indexOf(this.deliveryStatus) >= statusOrder.indexOf('Placed')", ie if 'this.deliveryStatus' is 'Placed' and 'statusOrder' is the array declared in 'handlebar-helper',then it 'equal or greater than' with status 'Placed',then it reached to 'completed' and('custom' class for 'green' color and 'completed' used as 'circle.completed' in 'css')  --}}
+                                {{/ifStatusReached}}">
+                                {{#ifStatusReached this.deliveryStatus 'Placed'}}
+                                <span class="tick">✓️</span>                                 {{!--  Besides 'green' color circle, also creates a 'tick' inside the circle  --}}
+                                {{/ifStatusReached}}
+            </div>
+            <div class="inner-line {{#ifStatusReached this.deliveryStatus 'Placed'}}completed  {{!--  Initially start from 'inner-line'(ie custom class for 'line' between circle) and finally reach 'completed' class and we can give style like '.inner-line.completed'  --}}
+                                   {{/ifStatusReached}}">
+            </div>
+            <div class="step-text">
+              {{#ifStatusReached this.deliveryStatus "Placed"}}
+                <span class="fw-bold green-color">Placed - {{displayDate this.placedDate}}</span> {{!--  If reach status 'Placed', the text 'Placed' display in 'green color' and if not reached display text 'Placed - Pending' in 'light color'    --}}
+              {{else}}
+                <span class="light-color">Placed - Pending</span>
+              {{/ifStatusReached}}
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipped -->
+      <div class="tracking-step">     
+          <div class="step-wrapper">
+            <div class="circle {{#ifStatusReached this.deliveryStatus 'Shipped'}}completed{{/ifStatusReached}}">
+              {{#ifStatusReached this.deliveryStatus 'Shipped'}}
+                <span class="tick">✓️</span>
+              {{/ifStatusReached}}
+            </div>
+            <div class="inner-line {{#ifStatusReached this.deliveryStatus 'Shipped'}}completed{{/ifStatusReached}}"></div>
+            <div class="step-text">
+              {{#ifStatusReached this.deliveryStatus "Shipped"}}
+                <span class="fw-bold text-info">Shipped - {{displayDate this.shippedDate}}</span>
+              {{else}}
+                <span class="light-color">Shipped - Pending</span>
+              {{/ifStatusReached}}
+            </div>
+          </div>
+        </div>
+
+        <!-- Out for Delivery -->
+        <div class="tracking-step">
+          <div class="step-wrapper">
+            <div class="circle {{#ifStatusReached this.deliveryStatus 'Out for Delivery'}}completed{{/ifStatusReached}}">
+              {{#ifStatusReached this.deliveryStatus 'Out for Delivery'}}
+                <span class="tick">✓️</span>
+              {{/ifStatusReached}}
+            </div>
+            <div class="inner-line {{#ifStatusReached this.deliveryStatus 'Out for Delivery'}}completed{{/ifStatusReached}}"></div>
+            <div class="step-text">
+              {{#ifStatusReached this.deliveryStatus "Out for Delivery"}}
+              
+                <span class="fw-bold text-warning">Out for Delivery - {{displayDate this.outForDeliveryDate}}</span>
+              {{else}}
+                <span class="light-color">Out for Delivery - Pending</span>
+              {{/ifStatusReached}}
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivered -->
+        <div class="tracking-step">
+          <div class="step-wrapper">
+            <div class="circle {{#ifStatusReached this.deliveryStatus 'Delivered'}}completed{{/ifStatusReached}}">
+              {{#ifStatusReached this.deliveryStatus 'Delivered'}}
+                <span class="tick">✓️</span>
+              {{/ifStatusReached}}
+            </div>
+            <div class="step-text">
+              {{#ifStatusReached this.deliveryStatus "Delivered"}}
+                <span class="fw-bold text-primary">Delivered - {{displayDate this.deliveredDate}}</span>
+              {{else}}
+                <span class="light-color">Delivered - Pending</span>
+              {{/ifStatusReached}}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+     {{!-- For 'Cancel Order' and 'Change Date' buttons --}}
+      <div class=" mt-3">       
+       <button class="btn btn-danger btn-sm cancel-btn" data-orderid="{{@root.order._id}}">Cancel Order</button>   {{!-- We iterating inside 'products' array(that inside 'orders' object),so we retrieve root value(ie 'order._id')by using '@root.' and store this value into a 'data-' attribute --}}
+       {{#ifStatusReached this.deliveryStatus "Out for Delivery"}}                {{!-- 'Change Date' button only appears if deliveryStatus is 'Out for delivery' --}}
+          <button class="btn btn-primary btn-sm ml-5 change-date-btn" data-orderid="{{@root.order._id}}" data-currentdate="{{this.outForDeliveryDate}}"> Change Date </button>
+        {{/ifStatusReached}}
+      </div>
+
+    </div>
+  {{/each}}
+
+</div>
+
+ {{!-- Popup message box by 'modal' bootstrap for change date,and calls from 'openChangeDateModal()'  --}}
+<div class="modal fade" id="changeDateModal" tabindex="-1" aria-labelledby="changeDateModalLabel" aria-hidden="true"> {{!-- 'modal' is bootstrap class for popup and 'fade' for 'fade-in','fade-out' for popup box and we should use 'tabindex="-1"' with 'modal' it helps to keyboard accessability. 'aria-labelledby="changeDateModalLabel" tells screen readers(for visually impired people)to announce 'modal-title'(ie 'Postpone Delivery Date') and 'aria-hidden="true" used for 'hide' the 'modal' initially and using 'modal.show()' in 'js' for display it when click 'Change Date' button    --}}
+  <div class="modal-dialog">              {{!-- 'modal-dialog' control how to appear 'modal' in viewport and 'modal-content' holds 'modal-header'(usually it contains 'modal-title' and 'Close' button),'modal-body'(it contains main content area like 'calender','input' etc),'modal-footer'(usually it contains 'Cancel','Save','Close' buttons) etc.  --}}
+    <div class="modal-content">
+      <div class="modal-header">          {{!-- 'modal-header' holds 'modal-title'(for title) and 'Close' button --}}
+        <h5 class="modal-title" id="changeDateModalLabel">Postpone Delivery Date</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">            {{!-- 'modal-body' holds main content like 'calender','<input>' etc --}}
+        <label for="newDeliveryDate">Select a new delivery date (up to 5 days later):</label>
+        <input type="date" id="newDeliveryDate" class="form-control" min="" max="" onkeydown="return false"  />     {{!-- min="" and 'max="' prevents the date before 'min' and after 'max' and these value set dynamically in 'js'. 'onkeydown="return false" prevents manually typing   --}}
+      </div>
+      <div class="modal-footer">          {{!-- 'modal-footer' holds 'Close','Save/Confirm' button --}}
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="confirmPostponeBtn" type="button" class="btn btn-primary" >Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // For Cancel button
+      document.querySelectorAll('.cancel-btn').forEach(item => {  // We iterate 'orders.product' array for display each product in handlebar and here we using 'forEach()' for retrieve data of each product for further operation in 'js'.
+        item.addEventListener('click', () => {
+            const orderId = item.dataset.orderid;                // 'dataset' is the built-in DOM property, used for retrieve data stored in 'data-' attribute, in 'js'
+            cancelOrder(orderId);
+        });
+      });
+
+      // Cancel Entire Order (not individual product)
+      function cancelOrder(orderId) {
+          if (confirm('Are you sure you want to cancel the entire order?')) {  // 'confirm()' display popup message box, and it returns 'true' or 'false'
+            fetch('/cancel-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                alert('Order cancelled. Refund initiated.');
+                window.location.href = (`/orders`)        // Return 'orders' route,there we go to 'cancelled' section.
+              } else {
+                alert('Order cancellation failed.');
+              }
+            })
+            .catch(err => {
+              console.error('Error cancelling order:', err);
+              alert('Something went wrong.');
+            });
+          }
+      };
+  });
+
+
+ // 'Change Date' buttons, appears only when 'deliveryStatus:Out for delivery'
+ document.addEventListener('DOMContentLoaded', function () {
+      let selectedOrderId = '{{order._id}}';                    // Declare 'selectedOrderId' as globally because it's used in 'postponeDelivery()' 
+
+      document.querySelectorAll('.change-date-btn').forEach(item => {
+          item.addEventListener('click', () => {
+            const orderId = item.dataset.orderid;               // 'dataset' is the built-in DOM property, used for retrieve data stored in 'data-' attribute, in 'js'
+            const currentDate = item.dataset.currentdate;       // 'currentdate' also retrieve from 'data-' in 'Change Date' button
+
+            selectedOrderId = orderId;                          // Retrieve 'orderId' of each button
+            openChangeDateModal(currentDate);
+          });
+      });
+
+      function openChangeDateModal(currentDate) {
+        const dateInput = document.getElementById('newDeliveryDate'); // Retrieve data from 'modal'(ie especially '<input type=date')
+        const today = new Date().toISOString().split('T')[0];         // 'toISOString()' convert current date into 'string' like '2025-06-21T14:30..' format(but 'toString()' converts it into like 'Sat Jun 21 2025' etc) and 'split('T')' spliting into 2 parts from the word 'T' and '[0]' take the first part(ie '2025-06-21').
+
+        dateInput.min = today;                                        // Set 'min' value/date as 'today'
+
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 5);
+        dateInput.max = maxDate.toISOString().split('T')[0];
+
+        //dateInput.value = currentDate ? currentDate.split('T')[0] : today;
+
+        const modal = new bootstrap.Modal(document.getElementById('changeDateModal'));    //  'modal' is the 'Modal' bootstrap object created in 'js',cotains all data of 'modal' popup message box, and it is initially hidden because of using 'aria-hidden="true" in 'handlebar' and using 'modal.show()' in 'js' for display it when click 'Change Date' button.
+        modal.show();
+      };
+
+      // For 'Confirm/update' the postpone delivery
+      document.getElementById('confirmPostponeBtn').addEventListener('click', postponeDelivery);  // Triggers when click the 'Confirm' button in the 'modal' popup
+       function postponeDelivery() {
+            const newDate = document.getElementById('newDeliveryDate').value;
+
+            if (!newDate) {
+              alert('Please select a new delivery date.');
+              return;
+            }
+
+            fetch('/postpone-delivery', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: selectedOrderId, newDate })
+            })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  alert('Date updated!');
+                  location.reload();
+                } else {
+                  alert('Update failed.');
+                }
+              })
+              .catch(err => {
+                console.error('Error updating delivery date:', err);
+                alert('Something went wrong.');
+              });
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('changeDateModal'));
+            modal.hide();       // After update new 'Out for delivery' date successfully, hiding the 'modal' popup message box
+      };
+ });
+
+</script>
+  
+
+
+     

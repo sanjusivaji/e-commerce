@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link rel="stylesheet" href="/stylesheets/style.css"> <!-- optional styling -->
+</head>
+<body>
+   <div class="container mt-4">
+    <h2 class="mb-4">Payment Summary</h2>
+
+    <!-- Address Box -->
+    <div class="card mb-4 p-3">
+        <h4 class="mb-2">Delivering to:</h4>
+        <p class="mb-0">
+            <strong>{{userAddress.fullName}}</strong><br>
+            {{userAddress.houseNo}}, {{userAddress.street}},<br>
+            {{userAddress.city}}, {{userAddress.state}} - {{userAddress.pincode}}
+        </p>
+    </div>
+
+    <!-- Delivery Date Box -->
+    <div class="card mb-4 p-3">
+        <h4 class="mb-2">Expected Delivery:</h4>
+        <h3><strong style="color: rgb(155, 236, 74);">{{deliveryDate}}</strong></h3>
+    </div>
+
+ 
+    <!-- Cart Items Box -->
+<div class="card mb-4 p-3">
+    <h4 class="mb-3">Cart Items:</h4>
+    <ul class="list-unstyled">
+        {{#each products}}
+        <li class="d-flex align-items-center mb-3">
+            <img src="/{{this.image}}" alt="{{this.name}}" style="width: 80px; height: auto; border-radius: 10px; margin-right: 15px;">
+            <div>
+                <strong>{{this.name}}</strong><br>
+                Qty: {{this.quantity}}<br>
+                ₹{{this.decreasedPrice}}
+            </div>
+        </li>
+        {{/each}}
+    </ul>
+
+        <hr>
+        <div class="d-flex justify-content-between">
+            <span>Subtotal:</span>
+            <strong>₹{{subTotal}}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+            <span>Delivery Charge:</span>
+            <strong>₹{{shippingCost}}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+            <span>Promotion Discount:</span>
+            <strong style="color: green;">-₹{{promotionDiscount}}</strong>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+            <h5><strong style="color: rgb(185, 9, 3);">Total:</strong></h5>
+            <h5><strong style="color: rgb(185, 9, 3);">₹{{grandTotal}}</strong></h5>
+        </div>
+       
+    </div>
+  
+
+    <button id="pay-button" class="btn btn-success btn-lg">Pay Now</button>
+</div>
+<div id="overlay" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(255,255,255,0.8); z-index: 9999; text-align: center; padding-top: 200px;">
+    <h3 class="light-color">Please wait while we confirm your payment<span style="color: rgb(243, 57, 40);" class="dot-animate"></span></h3>
+</div>
+
+
+<style>
+  {{!-- For 'dot' animation after the text --}}
+.dot-animate::after {
+    content: '';
+    display: inline-block;
+    animation: dots 1.2s steps(3, end) infinite;
+    width: 1em;
+    text-align: left;
+}
+
+@keyframes dots {
+    0%   { content: ''; }
+    33%  { content: '.'; }
+    66%  { content: '..'; }
+    100% { content: '...'; }
+}
+</style>
+
+ 
+<script>
+    var options = {  // In 'options' we use built-in keys like 'key,amount, handler, prefill' etc
+        "key":"{{keyId}}", 
+        "amount": "{{amount}}", 
+        "currency": "INR",
+        "name": "Your Store",
+        "description": "Order Payment",
+        "order_id": "{{orderId}}",
+        "handler": function (response) {  // 'handler()' for dispaly text and animation between 'Transaction success' and 'Order Success'
+            document.getElementById("overlay").style.display = "block";
+
+            fetch('/razorpay/verify-payment', {  // Send data of 'razorpay_order_id, razorpay_payment_id, razorpay_signature',created by 'razorpay', through the 'post' request.
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(response)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "/order-success";  // Trigger the route,when response is 'success', in 'js'.
+                } else {
+                    alert("Payment verification failed!");
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error("Error verifying payment:", error);
+                alert("Server error. Try again.");
+                document.getElementById("overlay").style.display = "none";
+            });
+        },
+        "prefill": {
+            "name": "{{user.name}}",
+            "email": "{{user.email}}",
+            "contact": "{{user.phoneNumber}}"
+        },
+        "theme": { "color": "#3399cc" }
+    };
+
+    var razpay = new Razorpay(options); // Create an 'instance', with all data of 'options'
+    document.getElementById('pay-button').onclick = function (event) {
+    event.preventDefault();
+
+    // Disable the button to prevent multiple clicks
+    const button = document.getElementById('pay-button');
+    button.disabled = true;
+    button.textContent = 'Processing...'; 
+
+    razpay.open(); // Opens the 'UI' of 'razorpay'
+
+    // Re-enable the button after a small timeout if popup is closed (optional fallback)
+    razpay.on('payment.failed', function () {  // '.on()' is used for listen specific 'razorpay' event,and 'payment.failed' is the 'event',triggers when fails the payment.
+        button.disabled = false;
+        button.textContent = 'Pay Now';
+    });
+};
+</script>
+</body>
+</html>
