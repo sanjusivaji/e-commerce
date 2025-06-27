@@ -1,5 +1,5 @@
-{{!-- This is a 'bootstrap' "<html>" code for 'login' 'form', and we put 'bootstraps' 'link' in "layout.hbs"  --}}
 
+   
 <body>
 
     <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
@@ -19,7 +19,7 @@
             <div class="form-group position-relative">
                 <label>Password</label>
                 <input type="password" name="Password" id="password" class="form-control" placeholder="Enter password" required>
-                <span id="toggleIcon" class="position-absolute light-color" style="top: 50px; right: 10px; cursor: pointer;">
+                <span onclick="togglePassword()" class="position-absolute light-color" style="top: 50px; right: 10px; cursor: pointer;">
                     <i id="eyeIcon" class="fa-solid fa-eye"></i>
                 </span>
             </div>
@@ -34,19 +34,15 @@
 </div>
 
 <script>
-     document.addEventListener('DOMContentLoaded',() => {
-        const toggleIcon = document.getElementById("toggleIcon");
-        toggleIcon.addEventListener("click", togglePassword);
-    });
-    function togglePassword() {
-        const pwd = document.getElementById("password");
-        const icon = document.getElementById("eyeIcon");
-        if (pwd.type === "password") {
-            pwd.type = "text";
-            icon.classList.replace("fa-eye", "fa-eye-slash");
-        } else {
-            pwd.type = "password";
-            icon.classList.replace("fa-eye-slash", "fa-eye");
-        }
-    };
+function togglePassword() {
+    const pwd = document.getElementById("password");
+    const icon = document.getElementById("eyeIcon");
+    if (pwd.type === "password") {
+        pwd.type = "text";
+        icon.classList.replace("fa-eye", "fa-eye-slash");
+    } else {
+        pwd.type = "password";
+        icon.classList.replace("fa-eye-slash", "fa-eye");
+    }
+}
 </script>
