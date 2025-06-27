@@ -209,7 +209,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
     try {
           let user = req.session.user;
           req.session.cart;
-          let cartData = await userHelper.getCartProducts(user._id);  // Function returns an 'array of object' and 'status'.
+          let cartData = await viewProductHelper.getCartProducts(user._id);  // Function returns an 'array of object' and 'status'.
   
           // Adding 'decreasedPrice' and 'total' into the 'array'
           const cartItems = cartData.products.map(item => {
@@ -224,7 +224,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
           });
   
           const grandTotal = cartItems.reduce((sum, item) => sum + parseInt(item.total), 0);
-          const cartCount = user ? await userHelper.getCartCount(user._id) : 0; 
+          const cartCount = user ? await viewProductHelper.getCartCount(user._id) : 0; 
           req.session.cart = cartItems;
           
           res.render('user/cart', {
@@ -251,7 +251,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid quantity" });
         }
   
-        await userHelper.updateCartQuantity(userId, productId, newQuantity); // Function returns 'success' 'true' or 'false'
+        await viewProductHelper.updateCartQuantity(userId, productId, newQuantity); // Function returns 'success' 'true' or 'false'
         res.json({ success: true });
     } catch (error) {
         console.error("Error updating cart:", error);
@@ -265,7 +265,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
     try {
         let userId = req.session.user._id;
         let productId = req.params.id;
-        await userHelper.removeFromCart(userId, productId); // Function return 'success: true' or 'false'.
+        await viewProductHelper.removeFromCart(userId, productId); // Function return 'success: true' or 'false'.
   
         res.json({ success: true, message: "Item removed successfully" });
     } catch (error) {
@@ -281,7 +281,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
     try {
         const user = req.session.user;
         let userId = req.session.user._id;
-        let addresses = await userHelper.getUserAddresses(userId); // Function returns an 'array' contains user 'addresses'.
+        let addresses = await viewProductHelper.getUserAddresses(userId); // Function returns an 'array' contains user 'addresses'.
         
         res.render('user/address', {user, addresses: addresses.length ? addresses : []});                          
   
@@ -295,7 +295,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   // For add the user address in 'address' page
   router.post('/add-address',verifyLogin,async (req, res) => {
       try{
-      let result = await userHelper.addAddress(req.session.user._id, req.body); // Function returns 'success:true' or 'false' with 'error' message.
+      let result = await viewProductHelper.addAddress(req.session.user._id, req.body); // Function returns 'success:true' or 'false' with 'error' message.
       res.json(result);
       }catch (error) {
         console.error("Error adding addresses:", error);
@@ -308,7 +308,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   router.get('/get-address/:id',verifyLogin, async (req, res) => {
     let addressId = req.params.id;
     let userId = req.session.user._id;
-    let address = await userHelper.getAddressById(userId, addressId); // Function returns a 'document'.
+    let address = await viewProductHelper.getAddressById(userId, addressId); // Function returns a 'document'.
     
     res.json(address);
   });
@@ -321,7 +321,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
         const userId = req.session.user._id;
         const updatedData = req.body; 
   
-        const result = await userHelper.updateAddress(userId, addressId, updatedData);  // Function returns 'status'.
+        const result = await viewProductHelper.updateAddress(userId, addressId, updatedData);  // Function returns 'status'.
   
         res.json(result);
     } catch (error) {
@@ -335,7 +335,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   router.delete('/delete-address/:id',verifyLogin, async (req, res) => {
     let addressId = req.params.id;
     let userId = req.session.user._id;
-    let result = await userHelper.deleteAddress(userId, addressId); 
+    let result = await viewProductHelper.deleteAddress(userId, addressId); 
     res.json(result);
   });
   
@@ -343,7 +343,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   router.put('/make-default-address/:id',verifyLogin, async (req, res) => {
       let addressId = req.params.id;
       let userId = req.session.user._id;
-      let result = await userHelper.makeDefaultAddress(userId, addressId);
+      let result = await viewProductHelper.makeDefaultAddress(userId, addressId);
       res.json(result);
   });
   
@@ -353,7 +353,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   router.get('/get-address', verifyLogin,async (req, res) => {
       if (!req.session.user) return res.status(401).json({ message: "Unauthorized" });
   
-      let address = await userHelper.getDefaultAddress(req.session.user._id);  // Function returns 'one document'.
+      let address = await viewProductHelper.getDefaultAddress(req.session.user._id);  // Function returns 'one document'.
       
       if (!address) {
           return res.json(null); 
@@ -386,7 +386,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
         return res.status(400).send("No address found! Please add an address before proceeding.");
       }
   
-      const cartCount = user ? await userHelper.getCartCount(user._id) : 0; 
+      const cartCount = user ? await viewProductHelper.getCartCount(user._id) : 0; 
       res.render('user/payment', {
         user: user,
         userAddress: userAddress,
@@ -411,7 +411,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   
       const subTotal = cartItems.reduce((sum, item) => sum + item.decreasedPrice * item.quantity,0).toFixed(2);
   
-      const invoiceSettings = await userHelper.getShippingCost();  // Return an 'array'
+      const invoiceSettings = await viewProductHelper.getShippingCost();  // Return an 'array'
       console.log('This is shipping',invoiceSettings);
       
       let shippingCost = invoiceSettings[0].shippingCost || 0;     // 'invoiceSetting' is the 'array' and 'shippingCost' is a value,inside the 'document', in the array.   
@@ -426,7 +426,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
                           receipt: `order_${Date.now()}`,};  // 'Date.now()' creates current time stamp.
       const order = await razorpay.orders.create(orderData); // 'razorpay.orders.create()' register the order and return an 'order.id',used in '.open()'.
   
-      const cartCount = user ? await userHelper.getCartCount(user._id) : 0;
+      const cartCount = user ? await viewProductHelper.getCartCount(user._id) : 0;
   
       const deliveryDate = new Date();                  // Create an 'Date' object with 'current date' and time.
       deliveryDate.setDate(deliveryDate.getDate() + 7); // 'getDate()' used for get the date(ie date in 'deleveryDate' object) and 'setDate' used for 'update'  the date.
@@ -471,7 +471,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
             
             const totalAmount = products.reduce((sum, item) => sum + (item.decreasedPrice * item.quantity), 0);
   
-            const orderId = await userHelper.placeOrder( user._id,address, products, "Razorpay", totalAmount); // 'address' is the 'document','products' is an 'array' and 'Razorpay' is the 'string' representing the 'payment method'.
+            const orderId = await viewProductHelper.placeOrder( user._id,address, products, "Razorpay", totalAmount); // 'address' is the 'document','products' is an 'array' and 'Razorpay' is the 'string' representing the 'payment method'.
   
             req.session.cart = []; // After successful order, clear the cart in 'MongoDb' and also in 'session'.
   
@@ -497,9 +497,9 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
         const formattedDate = deliveryDate.toDateString();
   
         const subTotal = req.session.cart.reduce((sum, item) => sum + (item.decreasedPrice * item.quantity), 0);
-        const cartCount = user ? await userHelper.getCartCount(user._id) : 0;
+        const cartCount = user ? await viewProductHelper.getCartCount(user._id) : 0;
   
-        const invoiceSettings = await userHelper.getShippingCost();  // Return an 'array'
+        const invoiceSettings = await viewProductHelper.getShippingCost();  // Return an 'array'
         let shippingCost = invoiceSettings[0].shippingCost || 0;  // 'invoiceSetting' is the 'array' and 'shippingCost' is a value,inside the 'document', in the array.   
         let  promotionDiscount =  invoiceSettings[0].promotionDiscount || 0 ;
   
@@ -528,7 +528,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
         const products = req.session.cart;
         const totalAmount = products.reduce((sum, item) => sum + (item.decreasedPrice * item.quantity), 0);
        
-       await userHelper.placeOrder(user._id, address,products,"Cash on Delivery",totalAmount);
+       await viewProductHelper.placeOrder(user._id, address,products,"Cash on Delivery",totalAmount);
   
         req.session.cart = []; // Clear the 'cart' session.
   
@@ -591,7 +591,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
             const products = req.session.cart;
             const totalAmount = products.reduce((sum, item) => sum + (item.decreasedPrice * item.quantity), 0);
   
-            await userHelper.placeOrder(user._id, address,products,"PayPal",totalAmount);
+            await viewProductHelper.placeOrder(user._id, address,products,"PayPal",totalAmount);
   
             req.session.cart = [];
   
@@ -611,7 +611,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
         return res.redirect('/login');
       }
   
-      result = await userHelper.handleOrderSuccess(user); // Function returns 'status'.
+      result = await viewProductHelper.handleOrderSuccess(user); // Function returns 'status'.
   
       res.render('user/order-success', {
         title: "Order Successful",
@@ -631,7 +631,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   router.get('/orders', verifyLogin, async (req, res) => {
     try {
       let user = req.session.user;
-      const orders = await userHelper.getUserOrders(user._id);  // Function returns an 'array'(ie 'orders') contains '_id','userId','paymentMethod','status','deliveryStatus','refundStatus'(if cancel the order),'adminMessage','address' object(contains data of user address),'products' array(contains document/object of each products in the order)etc.
+      const orders = await viewProductHelper.getUserOrders(user._id);  // Function returns an 'array'(ie 'orders') contains '_id','userId','paymentMethod','status','deliveryStatus','refundStatus'(if cancel the order),'adminMessage','address' object(contains data of user address),'products' array(contains document/object of each products in the order)etc.
       // orders.forEach((order) => {
       //   order.products.forEach((item) =>{
       //     console.log('This is product',order._id,item);
@@ -651,7 +651,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   // Call from 'order' page to retrieve details of each order
   router.get('/order-details/:id', verifyLogin, async (req, res) => {
     user = req.session.user
-    const order = await userHelper.getOrderDetailsById(req.params.id);  // Function returns just 'one' document(ie 'object')contains 'userId','paymentMethod' 'address' object and 'products' array(data of each products).
+    const order = await viewProductHelper.getOrderDetailsById(req.params.id);  // Function returns just 'one' document(ie 'object')contains 'userId','paymentMethod' 'address' object and 'products' array(data of each products).
   
     res.render('user/order-details', { user, order });
   });
@@ -660,7 +660,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   // For 'Cancel Order' button in 'order-details' page
   router.post('/cancel-order', async (req, res) => {
     const { orderId } = req.body;
-    const result = await userHelper.cancelOrder(orderId);  // Function adding some new fields like 'status: Cancelled','refundStatus:Initiated' etc,after 'cancel succesfully' and return 'success'.
+    const result = await viewProductHelper.cancelOrder(orderId);  // Function adding some new fields like 'status: Cancelled','refundStatus:Initiated' etc,after 'cancel succesfully' and return 'success'.
   
     res.json({success: true});
   });
@@ -670,7 +670,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   router.post('/postpone-delivery', async (req, res) => {
     try{
     const { orderId, newDate } = req.body;
-    await userHelper.postponeDelivery(orderId, newDate);  // Function adding new fields like 'outForDeliveryDate:','deliveryStatus:Out for Delivery' and return 'resolved Promise' object.
+    await viewProductHelper.postponeDelivery(orderId, newDate);  // Function adding new fields like 'outForDeliveryDate:','deliveryStatus:Out for Delivery' and return 'resolved Promise' object.
                                                                         
         res.json({ success: true }); 
      }catch(err) {
@@ -684,7 +684,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
   router.get('/cancel-details/:id', verifyLogin, async (req, res) => {
     try {
       user = req.session.user
-      const order = await userHelper.getOrderDetailsById(req.params.id)  // Function retrieve 'order' object and contains '_id','userId','status','deleveryStatus','refundInitiatedDate','refundStatus','adminMessage','address' object,'products' arrayField etc
+      const order = await viewProductHelper.getOrderDetailsById(req.params.id)  // Function retrieve 'order' object and contains '_id','userId','status','deleveryStatus','refundInitiatedDate','refundStatus','adminMessage','address' object,'products' arrayField etc
       if (!order) return res.redirect('/orders');
   
       res.render('user/cancel-details',{order,user})  
@@ -702,7 +702,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
     user = req.session.user
   
     try {
-      const order = await userHelper.getOrderDetailsById(orderId); // Same function that used above for retrieve order details.
+      const order = await viewProductHelper.getOrderDetailsById(orderId); // Same function that used above for retrieve order details.
       
       if (!order || !order.products || order.products.length === 0) {
         return res.status(404).send('Order or product not found');
@@ -723,7 +723,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
     user = req.session.user;
   
     try {
-      const data = await userHelper.returnProductData(orderId, productId);  // Function returns an 'object' contains another object 'review'(contains '_id','orderId','productId','userId','rating','review','adminReply' etc).
+      const data = await viewProductHelper.returnProductData(orderId, productId);  // Function returns an 'object' contains another object 'review'(contains '_id','orderId','productId','userId','rating','review','adminReply' etc).
   
       if (!data) return res.status(404).send('Order or Product not found');
   
@@ -767,15 +767,15 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
             await imageFile.mv(fullPath);                                 // 'mv()' is built-in method of 'express-fileupload' for move file and 'fileName.mv(route)' is the syntax.
           }
   
-          const result = await userHelper.submitReview({userId:req.session.user._id,
-                                                          usersName: req.session.user.name,  // For dispaly 'user name' with 'icon' in 'review' section in 'view products' 
-                                                          orderId,
-                                                          productId,
-                                                          rating: parseInt(rating),
-                                                          title,
-                                                          review,
-                                                          image: filename,
-                                                        });                                  // Function update the above fields and return the same fields with 'insert id'.
+          const result = await viewProductHelper.submitReview({userId:req.session.user._id,
+                                                                usersName: req.session.user.name,  // For dispaly 'user name' with 'icon' in 'review' section in 'view products' 
+                                                                orderId,
+                                                                productId,
+                                                                rating: parseInt(rating),
+                                                                title,
+                                                                review,
+                                                                image: filename,
+                                                              });                                  // Function update the above fields and return the same fields with 'insert id'.
   
           
           if (result.error) {
@@ -821,7 +821,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
     try {
       user = req.session.user;
       const { orderId, productId } = req.params;
-      const invoiceData = await userHelper.getInvoiceData(orderId, productId);   // Function returns a object contains 'orderId','customer' object(contains address of user),'products' array(contains of details of each product),'shipping cost','discount','grand total','seller' object(contains address of seller) etc.
+      const invoiceData = await viewProductHelper.getInvoiceData(orderId, productId);   // Function returns a object contains 'orderId','customer' object(contains address of user),'products' array(contains of details of each product),'shipping cost','discount','grand total','seller' object(contains address of seller) etc.
       const {  date, customer, products, subTotal, totalTax, shipping, discount, grandTotal, seller } = invoiceData;  // Destructuring data same like 'shipping:invoiceData.shipping'
     
       const totalAfterTax = parseInt(subTotal) + parseInt(totalTax);
@@ -860,7 +860,7 @@ router.get('/cart/checkout', verifyLogin, async (req, res) => {
       const orderId = req.params.orderId;
       const productId = req.params.productId;
   
-      const invoiceData = await userHelper.getInvoiceData(orderId, productId);
+      const invoiceData = await viewProductHelper.getInvoiceData(orderId, productId);
       const { date, customer, products, subTotal, totalTax, shipping, discount, grandTotal, settings, seller } = invoiceData; // Destructuring data same like 'shipping:invoiceData.shipping'
   
       const totalAfterTax = parseInt(subTotal) + parseInt(totalTax);
