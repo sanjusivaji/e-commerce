@@ -1,0 +1,52 @@
+<header>  
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">  
+    <a class="navbar-brand" href="/admin">Admin Panel</a>  
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"  
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">  
+      <span class="navbar-toggler-icon"></span>  
+    </button>  
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">  
+      <ul class="navbar-nav mr-auto">  
+        <li class="nav-item">  
+          <a class="nav-link" href="/admin/orders">Set Orders</a>  
+        </li>  
+        <li class="nav-item">  
+          <a class="nav-link" href="/admin/users">Customers</a>  
+        </li>  
+        <li class="nav-item">  
+          <form action="/admin/delivery-charges" method="GET" class="form-inline">  
+            <button class="nav-link btn btn-link" type="submit" style=" cursor: pointer;">Set Delivery</button>  
+          </form>  
+        </li>  
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/tax-report">
+            <i class="fas fa-receipt"></i> Tax Report
+          </a>
+        </li>
+      </ul>  
+
+      <!-- Right-side Admin Info / Login -->
+      <ul class="navbar-nav ml-auto">  
+        {{#if admin}}{{admin.name}}{{else}}Account{{/if}}
+          </span>
+        </li>
+
+        {{#if admin}}
+        <li class="nav-item mx-2">
+          <a class="btn btn-outline-danger btn-sm" href="/logout">Logout</a>
+        </li>
+        {{else}}
+        <li class="nav-item mx-1">
+          <a class="btn btn-outline-primary btn-sm" href="/login">Login</a>
+        </li>
+      
+        {{/if}}
+        
+  
+      </ul>  
+    </div>  
+  </nav>  
+</header>
+
+
