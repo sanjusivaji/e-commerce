@@ -29,9 +29,13 @@
                                             <div class="position-absolute" style="top: 0; left: 0; background: rgba(0,0,0,0.1); color: white; padding: 4px 8px;">
                                               <h2 class="mb-0">{{../this.name}}</h2>
                                             </div>
-                                            <div class="position-absolute" style="top: 0; right: 0; background: red; color: white; padding: 4px 8px; font-size: 14px;">
-                                              -{{../this.discount}}%
+                                            {{#if (ne ../this.discount  0)}}   {{!--  Display  only when 'discount' in 'not equal' to '0' --}}
+                                            <div class="position-absolute" style="top: 10px; right: 0;left:80%; background: red; color: white; padding-left: 10px;border-radius: 30px; font-size: 22px;">
+                                             <div style="margin-top:5px;margin-left:5px;"><strong > {{../this.discount}}%</strong></div>  <p style="font-weight: 100; margin:0;">Off</p>
                                             </div>
+                                            {{else}}
+                                            <div> </div>
+                                            {{/if}}
                                     </div>
                                 </div>
                               {{/each}}
@@ -92,16 +96,19 @@
                           <!-- Price and Discount -->
                           <div class="mt-2">
                             <h4 class="mb-0"><strong>₹{{discountedPrice this.price this.discount}}</strong></h4>
+                            {{#if (ne this.discount  0)}}
                             <h6 class="text-muted">MRP: <span style="text-decoration: line-through;">₹{{this.price}}</span></h6>
+                            {{/if}}
                           </div>
+                          {{#if (ne this.discount  0)}}
                           <h6><strong><span class="text-danger">{{this.discount}}% Off</span></strong></h6>
-
+                          {{/if}}
                           <!-- inStock or outStock-->
                           <p class="{{#if this.inStock}}text-success{{else}}text-danger{{/if}}">
                             {{#if this.inStock}}In stock{{else}}Out of stock{{/if}}
                           </p>
 
-                          <!-- Add to Cart / Buy Now / Quantity -->
+                          <!-- Add to Cart / Buy Now / Quantity and Success message container -->
                           {{#if (and ../user this.inStock)}}
                             <form method="POST" class="product-form" data-product-id="{{this._id}}">  {{!-- put '2' buttons and one drop dropdown-menu in same form  --}}
                                 <div class="mb-2">
@@ -111,7 +118,10 @@
                                     {{/range}}
                                   </select>
                                 </div>
-                                  <div class="success-box">Added successfully!</div>
+                                  {{!-- Success message container --}}
+                                  <div class="success-box">
+                                    Added successfully!
+                                  </div>
                                   <button type="submit" name="action" value="add-to-cart" class="btn w-100 text-black mb-2" style="background-color: #FFD814; border-radius: 999px;">
                                     Add to Cart
                                   </button>
@@ -134,14 +144,14 @@
                             <div id="review-section-{{@index}}" class="mt-4 d-none" >
                                 <h5 class="light-color">Reviews</h5>
                                 <div class="list-group mb-2">
+                             
                                    {{#each this.reviews}}  {{!-- Iterating reviews arrayField --}}
+                                      <p class="mb-1 mt-2"> <span class="light-color"><i class="fas fa-user-circle" style="font-size: 24px; margin-right: 8px;"></i> {{usersName}}</span> </p>     {{!-- Display the user name and icon, above each review box --}}
                                       {{#ifCond @index '<' 1}}
                                           <div class="list-group-item">
-                                              {{#if this.userName}}
-                                               <p class="mb-1"> <span class="light-color"><i class="fas fa-user-circle" style="font-size: 24px; margin-right: 8px;"></i> {{ this.userName}}</span> </p>
-                                              {{/if}} 
+                                            
                                               {{#if this.image}} 
-                                                <img src="/reviews-images/{{this.image}}" alt="Review Image" class="img-fluid mt-2" style="max-width: 100px; object-fit: cover;"> 
+                                                <img src="/reviews-images/{{this.image}}" alt="Review Image" class="img-fluid mt-1" style="max-width: 100px; object-fit: cover;"> 
                                               {{/if}}
 
                                               <h5 class="mt-1 mb-1">{{this.title}}</h5>
@@ -171,15 +181,13 @@
                                 {{#ifCond this.reviews.length '>' 1}}            
                                   <a href="#" class="show-more-link" data-index="{{@index}}">More...</a>
                                 {{/ifCond}}
-                                  <div id="full-review-list-{{@index}}" class="list-group mt-3 d-none">
+                                  <div id="full-review-list-{{@index}}" class="list-group mt-0 d-none">
                                       {{#each this.reviews}}
                                           {{#ifCond @index '>=' 1}}
-                                              <div class="list-group-item">
-                                                  {{#if this.userName}}
-                                                    <p class="mb-1"> <span class="light-color"><i class="fas fa-user-circle" style="font-size: 24px; margin-right: 8px;"></i> {{ this.userName}}</span> </p>
-                                                  {{/if}} 
+                                              <div class="list-group-item m-0">
+                                                
                                                   {{#if this.image}} 
-                                                    <img src="/reviews-images/{{this.image}}" alt="Review Image" class="img-fluid mt-2" style="max-width: 100px; object-fit: cover;"> 
+                                                    <img src="/reviews-images/{{this.image}}" alt="Review Image" class="img-fluid mt-1" style="max-width: 100px; object-fit: cover;"> 
                                                   {{/if}}
 
                                                   <h5 class="mb-1">{{this.title}}</h5>
@@ -227,12 +235,11 @@
 // For 'search bar', start with 'debouncing'
 let debounceTimeout;
 function debounceSearch() {
-  clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(showSuggestions, 300);
+  clearTimeout(debounceTimeout);  // Clear the time set in 'debounceTimeout'
+  debounceTimeout = setTimeout(showSuggestions, 300);  // Call function after '300' milliseconds, for each typing of  user 
 }
 
 async function showSuggestions() {
-   console.log('Show suggestion called');
   const input = document.getElementById("search-bar");
   const query = input.value.trim();
   const suggestionList = document.getElementById("suggestion-list");
@@ -244,7 +251,7 @@ async function showSuggestions() {
   }
 
   try {
-    const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+    const res = await fetch(`/search?q=${encodeURIComponent(query)}`);  // 'encodeURIComponent' remove 'space' and 'charecter' between letter.
     const products = await res.json();  // Here 'res.json()' retrieve an 'array'.
     
     // Creates a new list
@@ -272,7 +279,7 @@ async function showSuggestions() {
 
 // Find matching letter and replace with css style
 function highlightMatch(text, inputValue) {
-  const regex = new RegExp(`(${inputValue})`, "gi");
+  const regex = new RegExp(`(${inputValue})`, "gi");   // Creates 'regex' object,match with 'global' and 'case insensitive'.
   return text.replace(regex, `<span class="highlight">$1</span>`);
 }
 
@@ -295,14 +302,14 @@ function sendingData(selectedId, products) {
   form.appendChild(selectedIdInput);
 
   document.body.appendChild(form);
-  form.submit();
+  form.submit();  // Submitting the 'form'.
 }
 
 // For 'Enter' key
 function handleKeyPress(event) {
-  if (event.key === 'Enter') {
+  if (event.key === 'Enter') {  // Checks the triggered 'event.key' is 'Enter'.
     const suggestionList = document.getElementById("suggestion-list");
-    if (suggestionList.children.length > 0) {
+    if (suggestionList.children.length > 0) {  // Checks 'suggestionList' has any value and if 'true', 'click' the 'first' value.
       suggestionList.children[0].click();
     }
   }
@@ -324,15 +331,15 @@ function handleKeyPress(event) {
   function toggleReviews(index) {
   const reviewSection = document.getElementById(`review-section-${index}`);
   if (reviewSection) {
-    reviewSection.classList.toggle('d-none');
-    reviewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    reviewSection.classList.toggle('d-none');  // For first click appears 'display none' class, and next click it diappears.
+    reviewSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); // For smooth scrowling.
   }
 };
 
 
 // For display reviews, if more than '5' 
 document.addEventListener('DOMContentLoaded', () => {
-  const showMore = document.querySelectorAll('.show-more-link');
+  const showMore = document.querySelectorAll('.show-more-link'); // Retrieve data from 'More...' link.
 
   showMore.forEach(item => {
     item.addEventListener('click', event => {
@@ -357,8 +364,8 @@ function showMoreReviews(index, event) {
 
  // For video play/pause button
   function togglePlay(index) {
-    console.log('Script loaded in toggle play');  
-    const video = document.getElementById('video-' + index);
+   // console.log('Script loaded in toggle play');  
+    const video = document.getElementById('video-' + index);  // Retrieve video like 'video- 0','video-1' etc
     const icon = document.getElementById('video-icon-' + index);
 
     if (!video) return;
@@ -380,21 +387,21 @@ document.addEventListener('DOMContentLoaded', function () {
   const productForms = document.querySelectorAll('.product-form');
 
   productForms.forEach(form => {
-    const productId = form.getAttribute('data-product-id');
-    const quantitySelect = form.querySelector('select[name="quantity"]');
-    const successBox = form.querySelector('.success-box');
+    const productId = form.getAttribute('data-product-id');  // Retrieve 'product-id' from 'data-' attribute.
+    const quantitySelect = form.querySelector('select[name="quantity"]');  // Selects '<select>' element,of drop-down menu, with css selector 'name=quantity'.
+    const successBox = form.querySelector('.success-box');   // Select 'success message' 'div' box.
 
-    form.addEventListener('submit', async function (e) {
-      const clickedButton = e.submitter;
+    form.addEventListener('submit', async function (event) {
+      const clickedButton = event.submitter;  // 'submitter' tells which 'submit event'(ie 'buttons' in the 'form')was triggered.
 
       // Handle "Add to Cart" button
       if (clickedButton?.value === 'add-to-cart') {
-        e.preventDefault(); // prevent normal form submission
+        event.preventDefault(); // prevent normal form submission
 
-        const quantity = quantitySelect?.value || 1;
+        const quantity = quantitySelect?.value || 1; // Retrieve 'select' element 'value'.
 
         try {
-          const response = await fetch(`/add-to-cart/${productId}`, {
+          const response = await fetch(`/add-to-cart/${productId}`, {  // Send request with 'productId' and 'quantity'.
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

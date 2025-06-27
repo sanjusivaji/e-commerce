@@ -2,15 +2,17 @@ const express = require('express');
 const router = express.Router();
 const viewProductHelper = require('../helpers/view-product-helper');
 const verifyLogin = require('../middleware/verifyLogin');
+const { log } = require('handlebars/runtime');
+
 
 // Homepage route
 router.get('/', async (req, res) => {
   try {
-    let user = req.session.user;
+    let user = req.session.user;   
     let products = [];
 
-      products = await viewProductHelper.getAllProducts(); 
-
+    products = await viewProductHelper.getAllProducts(); // Function return 'products' array contains all data of product
+    
     const cartCount = user ? await viewProductHelper.getCartCount(user._id) : 0;  // For display total no.of products in cart. 
 
     res.render('user/view-products', {
@@ -27,14 +29,14 @@ router.get('/', async (req, res) => {
 
 
 // Search route for suggestions
-router.get('/search', async (req, res) => {
+router.get('/search', verifyLogin,async (req, res) => {
   let user = req.session.user;
-  const query = req.query.q ? req.query.q.trim() : '';
+  const query = req.query.q ? req.query.q.trim() : '';  // Retrieve 'q'(ie user input letter)from 'req.query' and 'trimming' the space and charecter it.
   
   if (!query) return res.json([]);
 
   try {
-    const products = await viewProductHelper.searchProducts(query);   
+    const products = await viewProductHelper.searchProducts(query);   // Function return 'array' of matching product
     res.json(products);
   } catch (err) {
     console.error('Error in /search:', err);
@@ -44,9 +46,8 @@ router.get('/search', async (req, res) => {
 
 
 // Search results route
-router.post('/search-results', async (req, res) => {
+router.post('/search-results',verifyLogin, async (req, res) => {
   let { products = [], selectedId } = req.body;
-  console.log('Received in /search-results:', { products, selectedId });
 
   try {
     if (typeof products === 'string') {
@@ -66,7 +67,7 @@ router.post('/search-results', async (req, res) => {
     let finalProducts = [];
     if (products.length > 0 && selectedId) {
       finalProducts = [
-                        ...products.filter(item => item._id.toString() === selectedId),
+                        ...products.filter(item => item._id.toString() === selectedId),  // 'filter()' returns more than 'one' array,based on condition, and '...products'(spread operator)'combines' arrays.  
                         ...products.filter(item => item._id.toString() !== selectedId)
                       ];
     } else {
@@ -113,7 +114,7 @@ router.post('/add-to-cart/:id', verifyLogin, async (req, res) => {
 
 
 // For 'Buy Now' button
-router.post('/buy-now/:id', async (req, res) => {
+router.post('/buy-now/:id',verifyLogin, async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
@@ -130,7 +131,7 @@ router.post('/buy-now/:id', async (req, res) => {
 
     // Ensure price is numeric and round to nearest whole number
     const price = Math.round(Number(product.price));
-    const discountedPrice = Math.round(price - (price * product.discount) / 100);
+    const discountedPrice = Math.round(price - (price * (product.discount)) / 100);
 
     const productForCheckout = {
       _id: product._id,
@@ -154,16 +155,11 @@ router.post('/buy-now/:id', async (req, res) => {
 
 
 // For checkout page
-router.get('/cart/checkout', async (req, res) => {
-    // Ensure user is logged in
-    if (!req.session.user) {
-      console.log("User session missing, redirecting to login...");
-      return res.redirect('/login');
-    }
-  
+router.get('/cart/checkout', verifyLogin, async (req, res) => {
+    let user = req.session.user;
     // Ensure cart session exists
     if (!req.session.cart) {
-      let cartData = await viewProductHelper.getCartProducts(req.session.user._id);
+      let cartData = await viewProductHelper.getCartProducts(user._id);
       req.session.cart = cartData.products.length > 0 ? cartData.products : [];
     }
   
@@ -172,12 +168,17 @@ router.get('/cart/checkout', async (req, res) => {
     if (req.session.cart.length > 0) {
       grandTotal = req.session.cart .reduce((sum, item) => sum + item.decreasedPrice * item.quantity, 0); 
     }
-  
+    
+    const cartCount =  await viewProductHelper.getCartCount(user._id) ;
+    console.log('This is cartcount in ',cartCount);
+    
     res.render('user/checkout', {
-      title: "Checkout",
-      userAddress: req.session.userAddress,
-      products: req.session.cart,
-      grandTotal
+        user: req.session.user,
+        title: "Checkout",
+        userAddress: req.session.userAddress,
+        products: req.session.cart,
+        grandTotal,
+        cartCount
     });
   });
 

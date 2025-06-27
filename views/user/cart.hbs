@@ -1,72 +1,78 @@
 
-
-<table class="table table-bordered mt-5">
-    <thead>
-        <tr>
-            <th>Image</th>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {{#each products}}
-            <tr data-product-id="{{this._id}}">
-                <td>
-                    <img src="{{this.image}}?v={{Date.now}}" alt="{{this.name}}" style="width: 50px; height: 50px; object-fit: cover;">
+<div class="continer">
+    <table class="table table-bordered mt-5">
+        
+        <tbody>
+            {{#each products}}
+                <tr data-product-id="{{this._id}}">
+                   
+                    <td>
+                        <img src="{{this.image}}?v={{Date.now}}" alt="{{this.name}}" style="width: 50px; height: 50px; object-fit: cover;">   {{!--  Use 'Date.now()' for seperate 'time stamp' for each image  --}}
+                    </td>
+                    <td><strong>{{this.name}}</strong></td>
+                    <td>₹{{this.decreasedPrice}}</td>
+                    <td>
+                        <div class="input-group" style="width: 120px;">
+                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-type="decrease">−</button>      {{!-- Storing '-' value into custom 'data-' --}}
+                            <input type="number" class="form-control text-center quantity-input" value="{{this.quantity}}" readonly>
+                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-type="increase">+</button>
+                        </div>
+                    </td>
+                    <td class="total-price">₹{{this.total}}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm remove-item" data-product-id="{{this._id}}">Remove</button> 
+                    </td>
+                </tr>
+            {{/each}}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4"> 
+                <div class="d-flex justify-content-end w-100" style="color: brown; font-weight: bold;">Subtotal</div>        
                 </td>
-                <td>{{this.name}}</td>
-                <td>₹{{this.decreasedPrice}}</td>
-                <td>
-                    <div class="input-group" style="width: 120px;">
-                        <button class="btn btn-outline-secondary btn-sm update-quantity" data-type="decrease">−</button>
-                        <input type="number" class="form-control text-center quantity-input" value="{{this.quantity}}" readonly>
-                        <button class="btn btn-outline-secondary btn-sm update-quantity" data-type="increase">+</button>
-                    </div>
-                </td>
-                <td class="total-price">₹{{this.total}}</td>
-                <td>
-                    <button class="btn btn-danger btn-sm remove-item" data-product-id="{{this._id}}">Remove</button> 
+                <td colspan="2" class="text-end" style="color: brown; font-weight: bold;">
+                ₹ <span id="grand-total">{{grandTotal}}</span>
                 </td>
             </tr>
-        {{/each}}
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="4"> 
-            <div class="d-flex justify-content-end w-100" style="color: brown; font-weight: bold;">Subtotal</div>        
-            </td>
-            <td colspan="2" class="text-end" style="color: brown; font-weight: bold;">
-              ₹ <span id="grand-total">{{grandTotal}}</span>
-            </td>
-        </tr>
-    </tfoot>
-</table>
+        </tfoot>
+    </table>
 
-<div class="d-flex justify-content-center mt-3">
-    <a href="/cart/address" class="btn btn-secondary mx-3">Enter Address</a>
-    <a href="/cart/checkout" class="btn btn-primary mx-3">Place Order</a>
-</div>
+    <div class="d-flex justify-content-center mt-3">
+        <a href="/cart/address" class="btn btn-secondary mx-3">Enter Address</a>
+        <a href="/cart/checkout" class="btn btn-primary mx-3">Place Order</a>
+    </div>
+
+
+    </div>
+    </div>
+
+    <style>       
+
+        .remove-item {
+            border-radius: 50px;
+        }
+    </style>
+
 
 <script>
-   document.querySelector('table').addEventListener('click', function(event) {
-    let button = event.target.closest('.update-quantity, .remove-item');
+   document.querySelector('table').addEventListener('click', function(event) {  // Triggering all 'Table'
+    let button = event.target.closest('.update-quantity, .remove-item');  // It makes triggering 'target' or 'closest' elements. 
     if (!button) return;
 
-    let row = button.closest('tr');
+    let row = button.closest('tr');  // Find 'closest' ancestor(ie 'product',contains in '<tr>')
     let productId = row.getAttribute('data-product-id');
     let quantityInput = row.querySelector('.quantity-input');
     let type = button.getAttribute('data-type');
     let currentQuantity = parseInt(quantityInput.value);
 
+    // For 'Remove' button
     if (button.classList.contains('remove-item')) {
         event.preventDefault();
         removeFromCart(productId);
         return;
     }
 
+    // For update of '-' or '+' button
     if (type === "decrease") {
         if (currentQuantity > 1) {
             updateCart(productId, currentQuantity - 1);

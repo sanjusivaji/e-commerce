@@ -6,7 +6,58 @@ const { ObjectId } = require('mongodb');
 module.exports = {
 
 
-    // For searching products based on user input in search bar
+
+    // For get compleate data of  all products
+    getAllProducts: async () => {
+        const db = getDb();
+        try {
+        const cursor = await db.collection(collections.PRODUCT_COLLECTION).aggregate([
+            {
+            $lookup: {
+                from: collections.REVIEWS_COLLECTION,
+                localField: '_id',
+                foreignField: 'productId',
+                as: 'reviews'
+            }
+            },
+            {
+            $addFields: {           // Adding '3' new fields and one is 'arrayField'. 
+                avgRating: { $avg: "$reviews.rating" },
+                reviewCount: { $size: "$reviews" },
+                reviews: {
+                            $map: {
+                                input: "$reviews",
+                                as: "r",
+                                in: {
+                                    userId: "$$r.userId",
+                                    usersName: "$$r.usersName",
+                                    orderId: "$$r.orderId",
+                                    rating: "$$r.rating",
+                                    title: "$$r.title",
+                                    review: "$$r.review",
+                                    image: "$$r.image",
+                                    adminReply: "$$r.adminReply"
+                                    }
+                            }
+                }
+            }
+            }
+        ]);
+        const allProducts = []; 
+            for await (const item of cursor) {
+              allProducts.push(item);
+            };
+
+        return allProducts;
+        } catch (err) {
+        console.error('Error in getAllProducts with ratings:', err);
+        throw err;
+        }
+    },
+
+
+
+        // For searching products based on user input in search bar
          searchProducts: async ( query) => {
            const db = getDb();
            try {
@@ -31,7 +82,7 @@ module.exports = {
                },
               
                 {
-               $addFields: {  // Adding '3' new fields and one is 'arrayField'. 
+               $addFields: {          // In the 'addFields' stage, adding '3' new fields and one is 'arrayField'. 
                  avgRating: { $avg: "$reviews.rating" },           
                  reviewCount: { $size: "$reviews" },
                  reviews: {
@@ -68,65 +119,18 @@ module.exports = {
                  }
               }
              ]);
-             const cartItems = []; 
+             const searchProducts = []; 
              for await (const item of cursor) {
-                 cartItems.push(item);
+              searchProducts.push(item);
              }
          
-             return cartItems;
+             return searchProducts;
            } catch (err) {
              console.error('Error in searchProducts:', err);
              throw err;
            }
          },
    
-   
-       // For get compleate data of  all products
-       getAllProducts: async () => {
-         const db = getDb();
-         try {
-           const cursor = await db.collection(collections.PRODUCT_COLLECTION).aggregate([
-             {
-               $lookup: {
-                 from: collections.REVIEWS_COLLECTION,
-                 localField: '_id',
-                 foreignField: 'productId',
-                 as: 'reviews'
-               }
-             },
-             {
-               $addFields: {
-                 avgRating: { $avg: "$reviews.rating" },
-                 reviewCount: { $size: "$reviews" },
-                 reviews: {
-                   $map: {
-                     input: "$reviews",
-                     as: "r",
-                     in: {
-                           userId: "$$r.userId",
-                           orderId: "$$r.orderId",
-                           rating: "$$r.rating",
-                           title: "$$r.title",
-                           review: "$$r.review",
-                           image: "$$r.image",
-                           adminReply: "$$r.adminReply"
-                         }
-                   }
-                 }
-               }
-             }
-            ]);
-           const cartItems = []; 
-             for await (const item of cursor) {
-                 cartItems.push(item);
-             };
-   
-           return cartItems;
-         } catch (err) {
-           console.error('Error in getAllProducts with ratings:', err);
-           throw err;
-         }
-       },
    
    
        // For 'count' of total products in the cart
